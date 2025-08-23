@@ -11,3 +11,12 @@ staticfiles/
 media/
 .DS_Store
 
+__pycache__/
+*.pyc
+.env
+venv/
+.env.local
+staticfiles/
+media/
+.DS_Store
+
