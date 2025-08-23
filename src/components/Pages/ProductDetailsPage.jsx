@@ -63,7 +63,7 @@ export default function ProductDetailsPage() {
                         <Div className="row">
                             <Div className="col-lg-6">
                                 <img
-                                    src={getBestImageUrl(productDetails.image)}
+                                    src={getBestImageUrl(productDetails.image, 1200)}
                                     alt={productDetails?.title || 'Product Details'}
                                     className="cs-radius_15 w-100"
                                 />
@@ -75,7 +75,10 @@ export default function ProductDetailsPage() {
                                     subtitle={productDetails.subtitle}
                                 />
                                 <Spacing lg='40' md='20' />
-                                <p>{productDetails.description}</p>
+                                <div
+                                  className="richtext"
+                                  dangerouslySetInnerHTML={{ __html: productDetails.description }}
+                                />
                             </Div>
                         </Div>
 
