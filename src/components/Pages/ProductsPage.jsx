@@ -109,6 +109,10 @@ export default function ProductsPage() {
                         .slice(0, itemShow)
                         .map((product, index) => {
                             const productId = getProductId(product);
+                            const productHref =
+                              product?.attributes?.href ||
+                              product?.href ||
+                              `/products/${product?.attributes?.slug || product?.slug || productId}`;
                             
                             return (
                                 <Div
@@ -118,7 +122,7 @@ export default function ProductsPage() {
                                     <Product
                                       title={product?.title || product?.attributes?.title || 'Sans titre'}
                                       subtitle={product?.subtitle || product?.attributes?.subtitle || ''}
-                                      href={`/products/${productId}`}
+                                      href={productHref}
                                       src={getBestImageUrl(product?.image || product?.attributes?.image)}
                                       variant="cs-style1 cs-type1"
                                     />

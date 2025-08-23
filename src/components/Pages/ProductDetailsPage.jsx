@@ -11,17 +11,43 @@ import config from '../../config/config';
 import { getBestImageUrl } from '../../utils/images';
 
 export default function ProductDetailsPage() {
-    const params = useParams();
+    const { slug } = useParams();
     const [productDetails, setProductDetails] = useState(null);
     const strapiUrl = config.strapiUrl;
+
+    // Normalize Strapi entities (v4/v5) to a flat shape
+    const normalize = (item) => (item?.attributes ? { id: item.id, ...item.attributes } : item);
 
     useEffect(() => {
         const fetchProductDetails = async () => {
             try {
-                const response = await fetch(`${strapiUrl}/api/products/${params.productId}?populate=*`);
-                const data = await response.json();
-                console.log('Product details:', data.data);
-                setProductDetails(data.data);
+                const API = strapiUrl;
+                const requestedPath = `/products/${slug}`;
+
+                // 1) Try by href
+                let res = await fetch(`${API}/api/products?filters[href][$eq]=${encodeURIComponent(requestedPath)}&populate=*`);
+                let json = await res.json();
+
+                // 2) Fallback by slug
+                if (!json?.data?.length) {
+                    res = await fetch(`${API}/api/products?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`);
+                    json = await res.json();
+                }
+
+                // 3) Fallback by id/documentId (compatibility)
+                if (!json?.data?.length) {
+                    res = await fetch(`${API}/api/products/${encodeURIComponent(slug)}?populate=*`);
+                    json = await res.json();
+                    // Single entity style { data: {...} }
+                    if (json?.data) {
+                        setProductDetails(normalize(json.data));
+                        return;
+                    }
+                }
+
+                if (json?.data?.length) {
+                    setProductDetails(normalize(json.data[0]));
+                }
             } catch (error) {
                 console.error('Error fetching product details:', error);
             }
@@ -30,18 +56,23 @@ export default function ProductDetailsPage() {
         fetchProductDetails();
         window.scrollTo(0, 0);
         pageTitle('Product Details');
-    }, [params.productId, strapiUrl]);
+    }, [slug, strapiUrl]);
 
     const getCategoriesText = (product) => {
-        if (product.categories?.data) {
-            return product.categories.data.map(category => category.name).join(', ');
-        } else if (product.categories) {
-            return product.categories.map(category => category.name).join(', ');
-        } else if (product.category?.data?.name) {
-            return product.category.data.name;
-        } else if (product.category?.name) {
-            return product.category.name;
-        }
+        // Strapi nested (v4/v5): product.categories.data[*].attributes.name
+        const nested = product?.categories?.data?.map((c) => c?.attributes?.name).filter(Boolean);
+        if (nested?.length) return nested.join(', ');
+
+        // Flattened arrays
+        const flatArr = product?.categories?.map((c) => c?.name).filter(Boolean);
+        if (flatArr?.length) return flatArr.join(', ');
+
+        // Single category variants
+        const singleNested = product?.category?.data?.attributes?.name;
+        if (singleNested) return singleNested;
+        const singleFlat = product?.category?.name;
+        if (singleFlat) return singleFlat;
+
         return 'Aucune catégorie';
     };
 
@@ -51,7 +82,7 @@ export default function ProductDetailsPage() {
                 <PageHeading
                     title={productDetails.title}
                     bgSrc="../images/productsdetails_hero_bg.jpg"
-                    pageLinkText={params.productId}
+                    pageLinkText={slug}
                 />
             )}
 
