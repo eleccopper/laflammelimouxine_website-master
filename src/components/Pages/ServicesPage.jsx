@@ -6,6 +6,7 @@ import PostStyle2 from '../Post/PostStyle2';
 import Div from '../Div';
 import Spacing from '../Spacing';
 import config from '../../config/config';
+import { useParams } from 'react-router-dom';
 
 export default function ServicesPage() {
     pageTitle('Services');
@@ -14,6 +15,7 @@ export default function ServicesPage() {
     const [totalPages, setTotalPages] = useState(1);
     const itemsPerPage = 10;
     const strapiUrl = config.strapiUrl;
+    const { category } = useParams();
 
     useEffect(() => {
         const fetchBlogPosts = async () => {
@@ -35,7 +37,12 @@ export default function ServicesPage() {
         window.scrollTo(0, 0);
     }, [strapiUrl, currentPage]);
 
-    const displayedPosts = postData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    const getItemCategoryName = (item) => (
+      item?.attributes?.category ||
+      item?.attributes?.categories?.data?.[0]?.attributes?.name ||
+      item?.category ||
+      ''
+    );
 
     const makeSlug = (s) => (s || '')
       .toString()
@@ -45,9 +52,17 @@ export default function ServicesPage() {
       .replace(/[^a-z0-9]+/g, '-')       // non-alphanum -> dashes
       .replace(/^-+|-+$/g, '');          // trim dashes
 
+    const activeCategorySlug = category ? makeSlug(category) : null;
+
+    const filteredPosts = activeCategorySlug
+      ? postData.filter((it) => makeSlug(getItemCategoryName(it)) === activeCategorySlug)
+      : postData;
+
+    const displayedPosts = filteredPosts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
     return (
         <>
-            <PageHeading title="Nos services" bgSrc="/images/service_hero_bg.jpg" pageLinkText="Services" />
+            <PageHeading title="Nos services" bgSrc="/images/service_hero_bg.jpg" pageLinkText={category || 'Services'} />
             <Div className="container">
                 <Spacing lg="150" md="80" />
                 <Div className="row">
@@ -62,9 +77,9 @@ export default function ServicesPage() {
                                   thumb={item?.attributes?.image || item?.image}
                                   subtitle={item?.attributes?.subtitle || item?.subtitle}
                                   date={item?.attributes?.date || item?.date}
-                                  category={item?.attributes?.category || item?.category}
-                                  categoryHref="/services"
-                                  href={`/services/${slug}`}
+                                  category={getItemCategoryName(item)}
+                                  categoryHref={`/services/${makeSlug(getItemCategoryName(item))}`}
+                                  href={`/services/${makeSlug(getItemCategoryName(item))}/${slug}`}
                                 />
                               );
                             })()}

@@ -10,13 +10,20 @@ import { getBestImageUrl } from '../../utils/images';
 
 export default function ServicesDetailsPage() {
   const [blogData, setBlogData] = useState(null);
-  const { slug, id } = useParams(); // slug for SEO route, id for legacy route
+  const { category, slug, id } = useParams(); // category/slug for SEO route, id for legacy route
   const strapiUrl = config.strapiUrl;
 
   pageTitle('Service Details');
 
   // Normalize Strapi entity (v4/v5) to a flat shape
   const normalize = (item) => (item?.attributes ? { id: item.id, ...item.attributes } : item);
+
+  const makeSlug = (s) => (s || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 
   useEffect(() => {
     const fetchService = async () => {
@@ -54,7 +61,7 @@ export default function ServicesDetailsPage() {
 
     fetchService();
     window.scrollTo(0, 0);
-  }, [slug, id, strapiUrl]);
+  }, [category, slug, id, strapiUrl]);
 
   if (!blogData) {
     return <div>Loading...</div>;
@@ -65,7 +72,7 @@ export default function ServicesDetailsPage() {
       <PageHeading
           title={blogData?.title}
           bgSrc='/images/blog_hero_bg.jpeg'
-          pageLinkText={slug || id}
+          pageLinkText={`${category || 'services'} / ${slug || id}`}
       />
       <Spacing lg='150' md='80'/>
       <Div className="container">
@@ -84,7 +91,7 @@ export default function ServicesDetailsPage() {
               </Div>
               <Div className="cs-post_info">
                 <Div className="cs-post_meta cs-style1 cs-ternary_color cs-semi_bold cs-primary_font">
-                  <Link to={`/blog/${blogData?.category}`} className="cs-post_avatar">
+                  <Link to={`/services/${makeSlug(blogData?.category)}`} className="cs-post_avatar">
                     {blogData?.category}
                   </Link>
                 </Div>
