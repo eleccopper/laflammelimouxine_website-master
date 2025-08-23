@@ -8,6 +8,7 @@ import Div from '../Div';
 import SectionHeading from '../SectionHeading';
 import Spacing from '../Spacing';
 import config from '../../config/config';
+import { getBestImageUrl } from '../../utils/images';
 
 export default function ProductsPage() {
     pageTitle('Produits');
@@ -41,21 +42,29 @@ export default function ProductsPage() {
             .catch(error => console.error('Error fetching categories:', error));
     }, [strapiUrl]);
 
-    const filteredProducts = products.filter(product => {
-        if (active === 'all') {
-            return true;
-        } else {
-            if (product.categories?.data) {
-                return product.categories.data.some(category => category.name === active);
-            } else if (product.categories) {
-                return product.categories.some(category => category.name === active);
-            } else if (product.category?.data?.name) {
-                return product.category.data.name === active;
-            } else if (product.category?.name) {
-                return product.category.name === active;
-            }
-            return false;
-        }
+    const filteredProducts = products.filter((product) => {
+      if (active === 'all') return true;
+
+      // Strapi v4/v5 nested: product.attributes.categories.data[*].attributes.name
+      const nestedNames = product?.attributes?.categories?.data?.map(
+        (c) => c?.attributes?.name
+      );
+
+      // Flattened variants
+      const flatDataNames = product?.categories?.data?.map((c) => c?.attributes?.name || c?.name);
+      const flatNames = product?.categories?.map((c) => c?.attributes?.name || c?.name);
+      const singleCatNested = product?.category?.data?.attributes?.name;
+      const singleCatFlat = product?.category?.name;
+
+      const allNames = [
+        ...(Array.isArray(nestedNames) ? nestedNames : []),
+        ...(Array.isArray(flatDataNames) ? flatDataNames : []),
+        ...(Array.isArray(flatNames) ? flatNames : []),
+        ...(singleCatNested ? [singleCatNested] : []),
+        ...(singleCatFlat ? [singleCatFlat] : []),
+      ].filter(Boolean);
+
+      return allNames.includes(active);
     });
 
     const getProductId = (product) => {
@@ -78,15 +87,19 @@ export default function ProductsPage() {
                             <li className={active === 'all' ? 'active' : ''} onClick={() => setActive('all')}>
                                 <span>Tous</span>
                             </li>
-                            {categories.map(category => (
-                                <li
-                                    className={active === category.name ? 'active' : ''}
-                                    key={category.id}
-                                    onClick={() => setActive(category.name)}
-                                >
-                                    <span>{category.name}</span>
-                                </li>
-                            ))}
+                            {categories.map((category) => {
+                                const name = category?.attributes?.name || category?.name || '';
+                                const id = category?.id || name;
+                                return (
+                                  <li
+                                    className={active === name ? 'active' : ''}
+                                    key={id}
+                                    onClick={() => setActive(name)}
+                                  >
+                                    <span>{name}</span>
+                                  </li>
+                                );
+                            })}
                         </ul>
                     </Div>
                 </Div>
@@ -103,11 +116,11 @@ export default function ProductsPage() {
                                     key={productId || index}
                                 >
                                     <Product
-                                        title={product.title || 'Sans titre'}
-                                        subtitle={product.subtitle || ''}
-                                        href={`/products/${productId}`}
-                                        src={product.image?.formats?.thumbnail?.url || product.image?.url || ''}
-                                        variant="cs-style1 cs-type1"
+                                      title={product?.title || product?.attributes?.title || 'Sans titre'}
+                                      subtitle={product?.subtitle || product?.attributes?.subtitle || ''}
+                                      href={`/products/${productId}`}
+                                      src={getBestImageUrl(product?.image || product?.attributes?.image)}
+                                      variant="cs-style1 cs-type1"
                                     />
                                     <Spacing lg="25" md="25" />
                                 </Div>

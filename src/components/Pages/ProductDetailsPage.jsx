@@ -6,7 +6,9 @@ import PageHeading from '../PageHeading';
 import Div from '../Div';
 import SectionHeading from '../SectionHeading';
 import Spacing from '../Spacing';
+
 import config from '../../config/config';
+import { getBestImageUrl } from '../../utils/images';
 
 export default function ProductDetailsPage() {
     const params = useParams();
@@ -61,8 +63,8 @@ export default function ProductDetailsPage() {
                         <Div className="row">
                             <Div className="col-lg-6">
                                 <img
-                                    src={`${productDetails.image.formats.thumbnail.url}`}
-                                    alt="Product Details"
+                                    src={getBestImageUrl(productDetails.image)}
+                                    alt={productDetails?.title || 'Product Details'}
                                     className="cs-radius_15 w-100"
                                 />
                             </Div>

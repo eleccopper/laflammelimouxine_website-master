@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import Button from '../Button'
 import Div from '../Div'
+
 import Spacing from '../Spacing'
+import { getBestImageUrl } from '../../utils/images';
 
 export default function Product2({title, subtitle, btnText, btnLink, imageUrl, category}) {
   const [hovered, setHovered] = useState(false);
@@ -13,7 +15,7 @@ export default function Product2({title, subtitle, btnText, btnLink, imageUrl, c
           <Div className="col-lg-6">
             <Div className={hovered?"cs-portfolio_img active":"cs-portfolio_img"}>
               <h3 className="cs-portfolio_img_title">{category}</h3>
-              <Div className="cs-portfolio_img_in cs-shine_hover_1 cs-radius_5"><img src={imageUrl} alt="Portfolio" className="cs-w100" /></Div>
+              <Div className="cs-portfolio_img_in cs-shine_hover_1 cs-radius_5"><img src={getBestImageUrl(imageUrl)} alt={title || 'Portfolio'} className="cs-w100" /></Div>
             </Div>
           </Div>
           <Div className="col-xl-5 col-lg-6 offset-xl-1">
