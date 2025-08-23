@@ -6,33 +6,55 @@ import PageHeading from '../PageHeading';
 import Div from '../Div';
 import Spacing from '../Spacing';
 import config from '../../config/config';
+import { getBestImageUrl } from '../../utils/images';
 
 export default function ServicesDetailsPage() {
   const [blogData, setBlogData] = useState(null);
-  const params = useParams();
+  const { slug, id } = useParams(); // slug for SEO route, id for legacy route
   const strapiUrl = config.strapiUrl;
 
-  pageTitle('Blog Details');
+  pageTitle('Service Details');
+
+  // Normalize Strapi entity (v4/v5) to a flat shape
+  const normalize = (item) => (item?.attributes ? { id: item.id, ...item.attributes } : item);
 
   useEffect(() => {
-    const fetchBlogPost = async () => {
+    const fetchService = async () => {
       try {
-        const response = await fetch(`${strapiUrl}/api/blog-posts/${params.id}?populate=*`);
-        const data = await response.json();
-  
-        if (data && data.data) {
-          setBlogData(data.data);
+        let data;
+        // 1) SEO route: fetch by slug or by title guess
+        if (slug) {
+          let res = await fetch(`${strapiUrl}/api/blog-posts?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`);
+          let json = await res.json();
+          if (json?.data?.length) {
+            data = json.data[0];
+          } else {
+            // Fallback: try matching by title reconstructed from slug
+            const titleGuess = decodeURIComponent(slug).replace(/-/g, ' ');
+            res = await fetch(`${strapiUrl}/api/blog-posts?filters[title][$containsi]=${encodeURIComponent(titleGuess)}&populate=*`);
+            json = await res.json();
+            if (json?.data?.length) data = json.data[0];
+          }
+        }
+        // 2) Legacy route by id
+        if (!data && id) {
+          const res = await fetch(`${strapiUrl}/api/blog-posts/${encodeURIComponent(id)}?populate=*`);
+          const json = await res.json();
+          if (json?.data) data = json.data;
+        }
+        if (data) {
+          setBlogData(normalize(data));
         } else {
-          console.error('Invalid API response:', data);
+          console.error('Service not found for slug/id:', slug || id);
         }
       } catch (error) {
-        console.error('Error fetching blog post:', error);
+        console.error('Error fetching service details:', error);
       }
     };
-  
-    fetchBlogPost();
+
+    fetchService();
     window.scrollTo(0, 0);
-  }, [params.id, strapiUrl]);
+  }, [slug, id, strapiUrl]);
 
   if (!blogData) {
     return <div>Loading...</div>;
@@ -43,7 +65,7 @@ export default function ServicesDetailsPage() {
       <PageHeading
           title={blogData?.title}
           bgSrc='/images/blog_hero_bg.jpeg'
-          pageLinkText={params.id}
+          pageLinkText={slug || id}
       />
       <Spacing lg='150' md='80'/>
       <Div className="container">
@@ -51,11 +73,12 @@ export default function ServicesDetailsPage() {
           <Div className="col-lg-8">
             <Div className="cs-post cs-style2">
               <Div className="cs-post_thumb cs-radius_15">
-                {blogData?.image?.formats?.medium?.url && (
+                {(blogData?.image || blogData?.image?.data) && (
                   <img
-                      src={blogData?.image?.formats?.medium?.url}
-                      alt={blogData?.attributes?.image?.alternativeText || 'Post image'}
-                      className="w-100 cs-radius_15"
+                    src={getBestImageUrl(blogData.image, 1200)}
+                    alt={blogData?.image?.alternativeText || blogData?.image?.data?.attributes?.alternativeText || blogData?.title || 'Service image'}
+                    className="w-100 cs-radius_15"
+                    loading="lazy"
                   />
                 )}
               </Div>
@@ -66,7 +89,7 @@ export default function ServicesDetailsPage() {
                   </Link>
                 </Div>
                 <h2 className="cs-post_title">{blogData?.title}</h2>
-                <p>{blogData?.content}</p>
+                <div className="richtext" dangerouslySetInnerHTML={{ __html: blogData?.content || '' }} />
               </Div>
             </Div>
           </Div>

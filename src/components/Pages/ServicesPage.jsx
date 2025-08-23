@@ -37,6 +37,14 @@ export default function ServicesPage() {
 
     const displayedPosts = postData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+    const makeSlug = (s) => (s || '')
+      .toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // remove accents
+      .replace(/[^a-z0-9]+/g, '-')       // non-alphanum -> dashes
+      .replace(/^-+|-+$/g, '');          // trim dashes
+
     return (
         <>
             <PageHeading title="Nos services" bgSrc="/images/service_hero_bg.jpg" pageLinkText="Services" />
@@ -45,15 +53,21 @@ export default function ServicesPage() {
                 <Div className="row">
                     {displayedPosts.map((item, index) => (
                         <Div key={index} className={`col-lg-6 mb-4 ${index % 2 === 0 ? 'order-lg-1' : ''}`}>
-                            <PostStyle2
-                                title={item?.attributes?.title || item?.title}
-                                thumb={item?.attributes?.image || item?.image}
-                                subtitle={item?.attributes?.subtitle || item?.subtitle}
-                                date={item?.attributes?.date || item?.date}
-                                category={item?.attributes?.category || item?.category}
-                                categoryHref="/services"
-                                href={`/services/services-details/${item?.attributes?.documentId || item?.documentId || item?.id}`}
-                            />
+                            {(() => {
+                              const title = item?.attributes?.title || item?.title || '';
+                              const slug = item?.attributes?.slug || makeSlug(title);
+                              return (
+                                <PostStyle2
+                                  title={title}
+                                  thumb={item?.attributes?.image || item?.image}
+                                  subtitle={item?.attributes?.subtitle || item?.subtitle}
+                                  date={item?.attributes?.date || item?.date}
+                                  category={item?.attributes?.category || item?.category}
+                                  categoryHref="/services"
+                                  href={`/services/${slug}`}
+                                />
+                              );
+                            })()}
                         </Div>
                     ))}
                 </Div>
