@@ -5,9 +5,11 @@ import Div from '../Div';
 import './post.scss';
 import Spacing from "../Spacing";
 import { getBestImageUrl } from '../../utils/images';
+import { withCloudinaryTransform } from '../../utils/images';
 
 export default function PostStyle2({ thumb, title, subtitle, date, category, categoryHref, href }) {
-    const imgSrc = typeof thumb === "string" ? thumb : getBestImageUrl(thumb, 900);
+    const rawSrc = typeof thumb === "string" ? thumb : getBestImageUrl(thumb, 1200);
+    const imgSrc = withCloudinaryTransform(rawSrc, { width: 1200 });
     return (
         <Div className="cs-post cs-style2">
             <h2 className="cs-post_title">
