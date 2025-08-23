@@ -1,0 +1,409 @@
+@import '../../scss/default/color_variable';
+.cs-portfolio_1_heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  .cs-filter_menu {
+    margin-top: 5px;
+    margin-bottom: 15px;
+  }
+}
+
+.product-container {
+  position: relative;
+  margin-bottom: 20px;
+
+  .cs-portfolio_title_above {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: 600;
+    color: $white;
+    text-align: center;
+    background-color: $accent;
+    padding: 8px 20px;
+    border-radius: 25px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    max-width: 90%;
+    word-wrap: break-word;
+    white-space: normal;
+    z-index: 10;
+    line-height: 1.2;
+  }
+}
+
+.cs-portfolio.cs-style1 {
+  border-radius: 15px;
+  overflow: hidden;
+  position: relative;
+  height: 400px;
+  display: block;
+
+  .cs-portfolio_hover {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    background-color: rgba($black, 0.4);
+    transition: all 0.4s ease;
+    z-index: 2;
+  }
+  .cs-plus {
+    position: absolute;
+    height: 60px;
+    width: 60px;
+    left: 50%;
+    z-index: 1;
+    top: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+    transition: all 0.4s ease;
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background-color: #fff;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    &::before {
+      transform: translate(-50%, -50%) rotate(90deg);
+    }
+  }
+  &:hover {
+    .cs-portfolio_hover {
+      opacity: 1;
+    }
+    .cs-plus {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+  .cs-portfolio_bg {
+    height: 100%;
+    width: 100%;
+    border-radius: inherit;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .cs-portfolio_info {
+    min-height: 200px;
+    width: 100%;
+    border-radius: 0;
+    padding: 30px 25px;
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .cs-portfolio_info_bg {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    border-radius: inherit;
+    left: 0;
+    top: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.8) 0%,
+      rgba(0, 0, 0, 0.4) 50%,
+      transparent 100%
+    );
+  }
+  .cs-portfolio_title {
+    font-size: 20px;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
+    color: $white;
+    line-height: 1.2;
+    word-wrap: break-word;
+    max-width: 100%;
+  }
+  .cs-portfolio_subtitle {
+    display: inline-block;
+    position: relative;
+    z-index: 2;
+    color: $white;
+    font-size: 14px;
+    line-height: 1.3;
+    opacity: 0.9;
+    max-width: 100%;
+    word-wrap: break-word;
+  }
+  &.cs-type1 {
+    height: 400px;
+    .cs-portfolio_info_bg {
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+    &:hover {
+      .cs-portfolio_info_bg {
+        opacity: 1;
+      }
+    }
+  }
+  .cs-lightbox_item {
+    > div > img {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      left: 0;
+      top: 0;
+      object-fit: cover;
+      cursor: zoom-in;
+      z-index: 5;
+      opacity: 0;
+    }
+  }
+  &.cs-type1,
+  &.cs-type2 {
+    img:not(.__react_modal_image__medium_img) {
+      width: 100%;
+    }
+
+    .cs-portfolio_title,
+    .cs-portfolio_subtitle {
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+    &:hover {
+      .cs-portfolio_title {
+        transform: translateY(0);
+        opacity: 1;
+        transition-delay: 0.1s;
+      }
+      .cs-portfolio_subtitle {
+        transform: translateY(0);
+        opacity: 1;
+        transition-delay: 0.2s;
+      }
+    }
+  }
+  &.cs-type2 {
+    border-radius: 5px;
+    .cs-portfolio_hover {
+      background: linear-gradient(
+        180deg,
+        rgba(255, 74, 23, 0.7) 0%,
+        rgba(0, 0, 0, 0.8) 100%
+      );
+    }
+    .cs-portfolio_info_bg {
+      display: none;
+    }
+    .cs-portfolio_info {
+      height: 100%;
+      width: 100%;
+      border-radius: 0;
+      padding: 30px 20px 30px 25px;
+      bottom: 0;
+      left: 0;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-end;
+    }
+  }
+  &.cs-size1 {
+    height: 299px;
+  }
+  &.cs-size2 {
+    height: 622px;
+  }
+  &.cs-size3 {
+    height: 600px;
+  }
+}
+.__react_modal_image__modal_container {
+  cursor: zoom-out;
+  .__react_modal_image__medium_img {
+    cursor: initial;
+  }
+}
+.cs-portfolio.cs-style2 {
+  position: relative;
+  max-width: 1920px;
+  margin: auto;
+  .cs-gradient_shape {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 600px;
+    width: 600px;
+    border-radius: 50%;
+    background: radial-gradient(
+      50% 50% at 50% 50%,
+      rgba(41, 0, 208, 0.2) 0%,
+      rgba(24, 24, 24, 0.2) 100%
+    );
+    filter: blur(50px);
+  }
+  .cs-portfolio_img.active {
+    .cs-shine_hover_1 {
+      &::before {
+        animation: shine 1.3s;
+      }
+    }
+  }
+  .cs-section_heading.cs-style1 {
+    position: relative;
+    z-index: 2;
+  }
+  .cs-portfolio_img_title {
+    margin: 0;
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    writing-mode: vertical-lr;
+    transform: rotate(180deg) translateY(50%);
+    left: calc(((100vw - 1300px) / 2) / 2);
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    color: transparent;
+    -webkit-text-stroke: 2px #ff4a17;
+    font-size: 50px;
+  }
+  &.cs-type1 {
+    .cs-portfolio_img_title {
+      left: initial;
+      right: calc(((100vw - 1300px) / 2) / 2);
+      margin: 0 -30px 0 0;
+    }
+    .cs-gradient_shape {
+      right: initial;
+      left: 0;
+    }
+  }
+}
+.cs-page_navigation > * {
+  display: flex;
+}
+@media screen and (max-width: 1540px) {
+  .cs-portfolio.cs-style1 {
+    height: 380px;
+  }
+  .cs-portfolio.cs-style1.cs-size3 {
+    height: 450px;
+  }
+}
+@media screen and (max-width: 1400px) {
+  .cs-portfolio.cs-style2 {
+    .cs-portfolio_img_title {
+      left: calc(((100vw - 1120px) / 2) / 2);
+      font-size: 40px;
+      margin: 0 0 0 -27px;
+    }
+    &.cs-type1 {
+      .cs-portfolio_img_title {
+        left: initial;
+        right: calc(((100vw - 1120px) / 2) / 2);
+        margin: 0 -27px 0 0;
+      }
+    }
+  }
+}
+@media screen and (max-width: 1380px) {
+  .cs-portfolio.cs-style1 .cs-portfolio_title {
+    font-size: 18px;
+  }
+  .product-container .cs-portfolio_title_above {
+    font-size: 16px;
+    padding: 6px 16px;
+  }
+}
+@media screen and (max-width: 1199px) {
+  .cs-portfolio.cs-style2 {
+    .cs-portfolio_img_title {
+      left: calc(((100vw - 940px) / 2) / 2);
+    }
+    &.cs-type1 {
+      .cs-portfolio_img_title {
+        left: initial;
+        right: calc(((100vw - 940px) / 2) / 2);
+      }
+    }
+  }
+  .cs-portfolio_1_heading {
+    flex-direction: column;
+    align-items: flex-start;
+    .cs-filter_menu {
+      margin-top: 20px;
+    }
+  }
+}
+@media screen and (max-width: 1080px) {
+  .cs-portfolio.cs-style2 {
+    .cs-portfolio_img {
+      padding-left: 60px;
+    }
+    .cs-portfolio_img_title {
+      margin-left: 0;
+    }
+  }
+  .cs-portfolio.cs-style2.cs-type1 {
+    .cs-portfolio_img {
+      padding-right: 60px;
+    }
+    .cs-portfolio_img_title {
+      margin-right: 0;
+    }
+  }
+}
+@media screen and (max-width: 991px) {
+  .cs-portfolio.cs-style1 {
+    height: 350px;
+  }
+  .product-container .cs-portfolio_title_above {
+    font-size: 15px;
+    padding: 5px 14px;
+    top: -12px;
+  }
+  .cs-portfolio.cs-style2,
+  .cs-portfolio.cs-style2.cs-type1 {
+    .cs-portfolio_img {
+      position: relative;
+      padding-left: 70px;
+      padding-right: 0;
+    }
+    .cs-portfolio_img_title {
+      left: 30px;
+      right: initial;
+      margin: 0 0 0 -27px;
+    }
+    .cs-section_heading.cs-style1 {
+      padding-left: 70px;
+    }
+  }
+}
+@media screen and (max-width: 575px) {
+  .cs-portfolio.cs-style1 {
+    height: 320px;
+  }
+  .product-container .cs-portfolio_title_above {
+    font-size: 14px;
+    padding: 4px 12px;
+    top: -10px;
+    max-width: 95%;
+  }
+  .cs-portfolio.cs-style2 .cs-portfolio_img_title,
+  .cs-portfolio.cs-style2.cs-type1 .cs-portfolio_img_title {
+    margin: 0 0 0 -20px;
+    font-size: 32px;
+  }
+}

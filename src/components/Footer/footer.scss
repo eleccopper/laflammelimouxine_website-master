@@ -1,0 +1,123 @@
+@import '../../scss/default/color_variable';
+
+.cs-fooer_main {
+  padding: 50px 0 35px;
+  background-color: $black;
+  color: $white;
+  overflow: hidden;
+  max-height: 380px;
+}
+
+
+.cs-footer_item {
+  margin-bottom: 40px;
+  .cs-newsletter.cs-style1 {
+    margin-top: 6px;
+  }
+}
+
+.cs-widget_title{
+  color: #be3506;
+
+}
+
+.cs-social_btns.cs-style1 {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -7px;
+  a {
+    height: 36px;
+    width: 36px;
+    border-radius: 50%;
+    border: 2px solid white;
+    margin: 7px;
+    color: $white;
+    &:hover {
+      border-color: #00f;
+      transform: scale(1.08);
+      svg {
+        fill: #00f;
+      }
+    }
+  }
+}
+
+.cs-newsletter.cs-style1 {
+  .cs-newsletter_input {
+    background-color: #000;
+    color: $white;
+  }
+
+  .cs-newsletter_btn {
+    color: $white;
+    background-color: #00f;
+    &:before {
+      background: rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  .cs-newsletter_text {
+    margin-top: 25px;
+  }
+}
+
+.cs-bottom_footer {
+  display: flex;
+  background-color: #000;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  color: $white;
+  border-top: 1px solid #ccc;
+
+  > * {
+    padding: 4px 0;
+  }
+
+  .cs-copyright {
+    flex: 1;
+    text-align: center;
+  }
+
+  .toggle-button {
+    cursor: pointer;
+    background-color: #d24801; /* Couleur du bouton */
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    color: $white;
+    border-radius: 5px;
+    transition: background-color 0.3s ease-in-out;
+
+    &:hover {
+      background-color: #0077cc; /* Couleur au survol */
+    }
+  }
+
+  .cs-bottom_footer_right {
+    flex: 0 0 auto;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+
+  }
+
+  .cs-bottom_footer_left {
+    flex: 0 0 auto;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .cs-bottom_footer {
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+}
