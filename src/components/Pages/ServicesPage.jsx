@@ -46,13 +46,13 @@ export default function ServicesPage() {
                     {displayedPosts.map((item, index) => (
                         <Div key={index} className={`col-lg-6 mb-4 ${index % 2 === 0 ? 'order-lg-1' : ''}`}>
                             <PostStyle2
-                                title={item.title}
-                                thumb={`${item.image.formats.thumbnail.url}`}
-                                subtitle={item.subtitle}
-                                date={item.date}
-                                category={item.category}
-                                categoryHref="/services" 
-                                href={`/services/services-details/${item.documentId}`}
+                                title={item?.attributes?.title || item?.title}
+                                thumb={item?.attributes?.image || item?.image}
+                                subtitle={item?.attributes?.subtitle || item?.subtitle}
+                                date={item?.attributes?.date || item?.date}
+                                category={item?.attributes?.category || item?.category}
+                                categoryHref="/services"
+                                href={`/services/services-details/${item?.attributes?.documentId || item?.documentId || item?.id}`}
                             />
                         </Div>
                     ))}
