@@ -30,11 +30,6 @@ function App() {
           <Route path="contact" element={<ContactPage />} />
           <Route path="legalnotice" element={<LegalNoticePage />} />
         </Route>
-        <Route
-          path="/"
-          element={<Layout headerVariant="cs-site_header_full_width" />}
-        >
-        </Route>
         <Route path="*" element={<ErrorPage />} />
       </Routes>
     </>

@@ -47,13 +47,13 @@ export default function Header({ variant }) {
                     </li>
 
                     <li>
-                      <NavLink to="services" onClick={() => setMobileToggle(false)}>
+                      <NavLink to="/services" onClick={() => setMobileToggle(false)}>
                         Services
                       </NavLink>
                     </li>
                     <li>
                       <NavLink
-                        to="products"
+                        to="/products"
                         onClick={() => setMobileToggle(false)}
                       >
                         Produits
@@ -61,7 +61,7 @@ export default function Header({ variant }) {
                     </li>
                     <li>
                       <NavLink
-                        to="actualites"
+                        to="/actualites"
                         onClick={() => setMobileToggle(false)}
                       >
                         Actualités
@@ -70,7 +70,7 @@ export default function Header({ variant }) {
 
                     <li>
                       <NavLink
-                          to="contact"
+                          to="/contact"
                           onClick={() => setMobileToggle(false)}
                       >
                         Contact
