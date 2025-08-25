@@ -18,6 +18,37 @@ export default function ProductDetailsPage() {
     // Normalize Strapi entities (v4/v5) to a flat shape
     const normalize = (item) => (item?.attributes ? { id: item.id, ...item.attributes } : item);
 
+    // Helpers to read common fields regardless of shape (v4/v5 or legacy)
+    const pick = (obj, keys = []) => {
+        for (const k of keys) {
+            if (obj && obj[k] !== undefined && obj[k] !== null && obj[k] !== "") return obj[k];
+        }
+        return undefined;
+    };
+
+    const getType = (p) => pick(p || {}, ["type", "Type", "productType"]);
+    const getBrand = (p) => pick(p || {}, ["brand", "Brand", "marque"]);
+    const getPowerKw = (p) => {
+        const raw = pick(p || {}, ["power_kw", "powerKw", "puissance", "puissance_kw"]);
+        if (raw === undefined) return undefined;
+        const n = typeof raw === "string" ? Number(raw.replace(",", ".")) : Number(raw);
+        return Number.isFinite(n) ? n : undefined;
+    };
+
+    const getMainImage = (p) => {
+        // accept `image`, `images`, or Strapi media shapes
+        const img = p?.image || p?.images || p?.cover;
+        if (!img) return null;
+        // array
+        if (Array.isArray(img)) {
+            const first = img[0]?.url || img[0]?.formats?.large?.url || img[0]?.formats?.medium?.url || img[0]?.formats?.small?.url;
+            return first || null;
+        }
+        // single media with formats
+        const fm = img?.formats;
+        return (fm?.large?.url || fm?.medium?.url || fm?.small?.url || img?.url || null);
+    };
+
     useEffect(() => {
         const fetchProductDetails = async () => {
             try {
@@ -94,7 +125,7 @@ export default function ProductDetailsPage() {
                         <Div className="row">
                             <Div className="col-lg-6">
                                 <img
-                                    src={getBestImageUrl(productDetails.image, 1200)}
+                                    src={getBestImageUrl(getMainImage(productDetails) || productDetails.image, 1200)}
                                     alt={productDetails?.title || 'Product Details'}
                                     className="cs-radius_15 w-100"
                                 />
@@ -127,6 +158,30 @@ export default function ProductDetailsPage() {
                                     </p>
                                 </Div>
 
+                                <Spacing lg='20' md='10' />
+                                <Div>
+                                    <h3 className='cs-accent_color cs-font_22 cs-font_18_sm cs-m0'>Type :</h3>
+                                    <p className='cs-m0'>
+                                        {getType(productDetails) ? labelizeType(getType(productDetails)) : '—'}
+                                    </p>
+                                </Div>
+
+                                <Spacing lg='12' md='8' />
+                                <Div>
+                                    <h3 className='cs-accent_color cs-font_22 cs-font_18_sm cs-m0'>Marque :</h3>
+                                    <p className='cs-m0'>
+                                        {getBrand(productDetails) || '—'}
+                                    </p>
+                                </Div>
+
+                                <Spacing lg='12' md='8' />
+                                <Div>
+                                    <h3 className='cs-accent_color cs-font_22 cs-font_18_sm cs-m0'>Puissance (kW) :</h3>
+                                    <p className='cs-m0'>
+                                        {(() => { const v = getPowerKw(productDetails); return v !== undefined ? v : '—'; })()}
+                                    </p>
+                                </Div>
+
                             </Div>
                         </Div>
 
@@ -141,4 +196,16 @@ export default function ProductDetailsPage() {
             <Cta title='04 68 20 07 05' bgSrc="/images/cta_bg.jpeg" variant='rounded-0' />
         </>
     );
+}
+
+function labelizeType(t) {
+    if (!t) return '';
+    const s = String(t).toLowerCase();
+    switch (s) {
+        case 'air': return 'Air';
+        case 'canalisable': return 'Canalisable';
+        case 'etanche': return 'Étanche';
+        case 'hydro': return 'Hydro';
+        default: return t;
+    }
 }

@@ -28,7 +28,10 @@ export const getBestImageUrl = (img, wantWidth = 1200) => {
   ].filter((c) => c.u);
 
   // Prefer the smallest format that is >= wantWidth, otherwise fallback to the largest available
-  const best = candidates.find((c) => c.w >= wantWidth) || candidates[0];
+  // Sort candidates by width ascending
+  const sorted = [...candidates].sort((a, b) => a.w - b.w);
+  // Find the smallest available format larger than wantWidth
+  const best = sorted.find((c) => c.w >= wantWidth) || sorted[sorted.length - 1];
   return best?.u || media.url || '';
 };
 
@@ -68,8 +71,18 @@ export const withCloudinaryTransform = (url, opts = {}) => {
   return `${before}${transform}/${after}`;
 };
 
+// Absolute media URL helper
+import { STRAPI_URL } from '../config/config';
+
+export const absoluteMediaUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `${STRAPI_URL}${url}`;
+};
+
 // Default export for convenience
 export default {
   getBestImageUrl,
   withCloudinaryTransform,
+  absoluteMediaUrl,
 };

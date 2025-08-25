@@ -8,6 +8,8 @@ import ProductsPage from './components/Pages/ProductsPage';
 import HomePage from './components/Pages/HomePage';
 import Layout from './components/Layout';
 import LegalNoticePage from './components/Pages/LegalNoticePage';
+import ActualitesList from './components/Pages/ActualitesList';
+import ActualiteDetail from './components/Pages/ActualiteDetail';
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
           <Route path="services/:category" element={<ServicesPage />} />
           <Route path="services/:category/:slug" element={<ServicesDetailsPage />} />
           <Route path="services/services-details/:id" element={<ServicesDetailsPage />} />
+          <Route path="actualites" element={<ActualitesList />} />
+          <Route path="actualites/:slug" element={<ActualiteDetail />} />
           <Route path="contact" element={<ContactPage />} />
           <Route path="legalnotice" element={<LegalNoticePage />} />
         </Route>
