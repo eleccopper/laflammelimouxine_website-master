@@ -9,7 +9,8 @@ import SectionHeading from '../SectionHeading';
 import Spacing from '../Spacing';
 import config from '../../config/config';
 import { getBestImageUrl } from '../../utils/images';
-import ProductFilters from '../ProductFilters';
+import ProductFilters from '../Product/ProductFilters';
+import '../../styles/filters.css';
 
 export default function ProductsPage() {
     pageTitle('Produits');
@@ -17,8 +18,13 @@ export default function ProductsPage() {
     const [itemShow, setItemShow] = useState(6);
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [filters, setFilters] = useState({ type: '', puissance: '', marque: '' });
-    const [isFiltering, setIsFiltering] = useState(false);
+    const [filters, setFilters] = useState({
+      category: null,
+      type: [],
+      brand: [],
+      powerMin: null,
+      powerMax: null,
+    });
     const strapiUrl = config.strapiUrl;
 
     useEffect(() => {
@@ -67,12 +73,22 @@ export default function ProductsPage() {
         ...(singleCatFlat ? [singleCatFlat] : []),
       ].filter(Boolean);
 
-      // appliquer filtres avancés
-      if (isFiltering) {
-        if (filters.type && product?.attributes?.type !== filters.type) return false;
-        if (filters.puissance && product?.attributes?.puissance !== filters.puissance) return false;
-        if (filters.marque && product?.attributes?.marque !== filters.marque) return false;
-      }
+      // Filtres avancés (type / brand / puissance)
+      const hasType = Array.isArray(filters.type) && filters.type.length > 0;
+      const hasBrand = Array.isArray(filters.brand) && filters.brand.length > 0;
+      const hasMin = typeof filters.powerMin === 'number';
+      const hasMax = typeof filters.powerMax === 'number';
+
+      const a = product?.attributes || product; // tolérant v4/v5
+      const prodType = a.type || a?.attributes?.type;
+      const prodBrand = a.brand || a?.attributes?.brand;
+      const kwRaw = a.power_kw ?? a.powerKw ?? a.puissance; // tolérance aux noms
+      const prodKw = typeof kwRaw === 'string' ? Number(kwRaw.replace(',', '.')) : Number(kwRaw);
+
+      if (hasType && (!prodType || !filters.type.includes(String(prodType)))) return false;
+      if (hasBrand && (!prodBrand || !filters.brand.includes(String(prodBrand)))) return false;
+      if (hasMin && (!Number.isFinite(prodKw) || prodKw < filters.powerMin)) return false;
+      if (hasMax && (!Number.isFinite(prodKw) || prodKw > filters.powerMax)) return false;
 
       return allNames.includes(active);
     });
@@ -113,11 +129,7 @@ export default function ProductsPage() {
                         </ul>
                     </Div>
                 </Div>
-                <ProductFilters
-                  filters={filters}
-                  setFilters={setFilters}
-                  setIsFiltering={setIsFiltering}
-                />
+                <ProductFilters value={filters} onChange={setFilters} />
                 <Spacing lg="40" md="20" />
                 <Spacing lg="90" md="45" />
                 <Div className="row">
