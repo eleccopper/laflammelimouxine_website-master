@@ -1,0 +1,44 @@
+
+
+/* Product Filters – dedicated styles
+   Keep selectors namespaced with `.lfl-` to avoid collisions. */
+
+.lfl-filters { display:block; margin:1rem 0 1.25rem; padding:.75rem; border-radius:8px; background:#fafafa; border:1px solid #eee; }
+.lfl-filters__row { display:grid; grid-template-columns:repeat(12,1fr); gap:.75rem; align-items:start; }
+
+.lfl-filter { display:block; min-width:0; }
+.lfl-filter--category { grid-column:span 3; min-width:180px; }
+.lfl-filter--type { grid-column:span 3; }
+.lfl-filter--brand { grid-column:span 3; }
+.lfl-filter--power { grid-column:span 2; }
+.lfl-filter--actions { grid-column:span 1; display:flex; align-items:flex-end; }
+
+@media (max-width: 980px) {
+  .lfl-filter--category,
+  .lfl-filter--type,
+  .lfl-filter--brand,
+  .lfl-filter--power,
+  .lfl-filter--actions { grid-column:span 12; }
+}
+
+.lfl-filter__label { display:block; font-weight:600; margin:0 0 .35rem; font-size:.95rem; color:#111; }
+.lfl-filter__select { width:100%; padding:.5rem .6rem; border:1px solid #ddd; border-radius:6px; background:#fff; }
+
+.lfl-filter__group { display:flex; flex-wrap:wrap; gap:.5rem .75rem; }
+.lfl-check { display:inline-flex; align-items:center; gap:.4rem; padding:.3rem .45rem; border:1px solid #e7e7e7; border-radius:6px; background:#fff; cursor:pointer; user-select:none; transition:background .15s ease,border-color .15s ease, box-shadow .15s ease; }
+.lfl-check:hover { background:#f7f7f7; border-color:#ddd; }
+.lfl-check input { accent-color:#111; }
+.lfl-check__text { font-size:.95rem; }
+
+.lfl-number { display:flex; flex-direction:column; gap:.25rem; }
+.lfl-number input { width:100%; padding:.45rem .55rem; border:1px solid #ddd; border-radius:6px; background:#fff; }
+.lfl-range-sep { align-self:center; padding:0 .25rem; opacity:.8; }
+
+.lfl-btn { appearance:none; border:none; cursor:pointer; font-weight:600; }
+.lfl-btn--reset { padding:.55rem .8rem; border-radius:6px; background:#f1f1f1; border:1px solid #e1e1e1; }
+.lfl-btn--reset:hover { background:#e9e9e9; }
+
+/* Small skeleton helpers if needed */
+.lfl-skeleton { background:#f3f3f3; border-radius:8px; }
+.lfl-skeleton--title { height:28px; width:60%; margin:1rem 0; }
+.lfl-skeleton--block { height:180px; width:100%; }

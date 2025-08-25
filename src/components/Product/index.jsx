@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import Div from '../Div';
 import './product.scss';
 
-// Composant Portfolio
-export default function Portfolio({ href, src, title, subtitle, variant }) {
+// Composant Produit
+export default function ProductCard({ href, src, title, subtitle, variant }) {
   return (
       <div className="product-container">
         <Div className="cs-portfolio_title_above">{title}</Div>

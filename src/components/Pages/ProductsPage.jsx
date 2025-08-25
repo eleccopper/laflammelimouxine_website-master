@@ -9,6 +9,7 @@ import SectionHeading from '../SectionHeading';
 import Spacing from '../Spacing';
 import config from '../../config/config';
 import { getBestImageUrl } from '../../utils/images';
+import ProductFilters from '../ProductFilters';
 
 export default function ProductsPage() {
     pageTitle('Produits');
@@ -16,6 +17,8 @@ export default function ProductsPage() {
     const [itemShow, setItemShow] = useState(6);
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [filters, setFilters] = useState({ type: '', puissance: '', marque: '' });
+    const [isFiltering, setIsFiltering] = useState(false);
     const strapiUrl = config.strapiUrl;
 
     useEffect(() => {
@@ -64,6 +67,13 @@ export default function ProductsPage() {
         ...(singleCatFlat ? [singleCatFlat] : []),
       ].filter(Boolean);
 
+      // appliquer filtres avancés
+      if (isFiltering) {
+        if (filters.type && product?.attributes?.type !== filters.type) return false;
+        if (filters.puissance && product?.attributes?.puissance !== filters.puissance) return false;
+        if (filters.marque && product?.attributes?.marque !== filters.marque) return false;
+      }
+
       return allNames.includes(active);
     });
 
@@ -103,6 +113,12 @@ export default function ProductsPage() {
                         </ul>
                     </Div>
                 </Div>
+                <ProductFilters
+                  filters={filters}
+                  setFilters={setFilters}
+                  setIsFiltering={setIsFiltering}
+                />
+                <Spacing lg="40" md="20" />
                 <Spacing lg="90" md="45" />
                 <Div className="row">
                     {filteredProducts
