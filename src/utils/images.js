@@ -1,4 +1,4 @@
-
+import { absoluteMediaUrl } from './strapiUrl';
 
 // src/utils/images.js
 // Utility helpers to select the best image URL from Strapi/Cloudinary
@@ -71,18 +71,8 @@ export const withCloudinaryTransform = (url, opts = {}) => {
   return `${before}${transform}/${after}`;
 };
 
-// Absolute media URL helper
-import { STRAPI_URL } from '../config/config';
-
-export const absoluteMediaUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('http')) return url;
-  return `${STRAPI_URL}${url}`;
-};
-
 // Default export for convenience
 export default {
   getBestImageUrl,
   withCloudinaryTransform,
-  absoluteMediaUrl,
 };
