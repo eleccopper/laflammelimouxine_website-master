@@ -19,9 +19,12 @@ import { STRAPI_URL } from "../config/config";
  */
 
 function apiBase() {
-  const b = (STRAPI_URL || "").trim();
+  // Start from env/base, trim trailing slashes
+  let b = (STRAPI_URL || "").trim().replace(/\/+$/, "");
   if (!b) return "";
-  return b.endsWith("/") ? b.slice(0, -1) : b;
+  // Ensure exactly one '/api' suffix
+  if (!/\/api$/i.test(b)) b = `${b}/api`;
+  return b;
 }
 
 /** Build nested Strapi query strings safely */
@@ -141,7 +144,7 @@ export async function fetchActualites(opts = {}) {
     // tags filter removed as per instructions
   });
 
-  const data = await http(`/api/articles${qs}`);
+  const data = await http(`/articles${qs}`);
   const items = Array.isArray(data?.data) ? data.data.map(normalizeArticle) : [];
   const pagination = data?.meta?.pagination || { page, pageSize, pageCount: 1, total: items.length };
   return { items, pagination };
@@ -157,7 +160,7 @@ export async function fetchActualiteBySlug(slug) {
     publicationState: "live",
   });
 
-  const data = await http(`/api/articles${qs}`);
+  const data = await http(`/articles${qs}`);
   const items = Array.isArray(data?.data) ? data.data.map(normalizeArticle) : [];
   return items[0] || null;
 }
