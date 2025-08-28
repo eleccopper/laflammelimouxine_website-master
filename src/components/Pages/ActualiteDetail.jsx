@@ -38,8 +38,9 @@ export default function ActualiteDetail() {
   const { loading, error, item } = state;
 
   const coverUrl = useMemo(() => {
-    if (!item?.cover) return null;
-    const url = item.cover.formats?.large?.url || item.cover.formats?.medium?.url || item.cover.url;
+    const media = item?.image || item?.cover; // accepte `image` (v5) ou `cover` (ancien)
+    if (!media) return null;
+    const url = media.formats?.large?.url || media.formats?.medium?.url || media.url;
     return absoluteMediaUrl(url);
   }, [item]);
 
@@ -88,8 +89,8 @@ export default function ActualiteDetail() {
           <h1 className="actualite-title">{item.title}</h1>
           {published && <time dateTime={item.publishedAt} className="actualite-date">{published}</time>}
           {coverUrl && (
-            <div className="actualite-cover">
-              <img src={coverUrl} alt={item.title} loading="eager" />
+            <div className="actualite-cover" aria-hidden={false}>
+              <img src={coverUrl} alt={item.title || "Image d’illustration de l’article"} loading="eager" />
             </div>
           )}
         </header>
@@ -112,11 +113,14 @@ export default function ActualiteDetail() {
         {Array.isArray(item.tags) && item.tags.length > 0 && (
           <footer className="actualite-tags">
             <strong>Mots-clés :</strong>{" "}
-            {item.tags.map((t, i) => (
-              <span key={t} className="tag">
-                {t}{i < item.tags.length - 1 ? ", " : ""}
-              </span>
-            ))}
+            {item.tags.map((t, i) => {
+              const label = typeof t === "string" ? t : (t?.name || t?.title || "");
+              return (
+                <span key={label + i} className="tag">
+                  {label}{i < item.tags.length - 1 ? ", " : ""}
+                </span>
+              );
+            })}
           </footer>
         )}
       </article>
@@ -125,7 +129,7 @@ export default function ActualiteDetail() {
 
       <style>{`
         .breadcrumb { margin: .75rem 0; color: #666; font-size: .95rem; }
-        .actualite-title { margin: .25rem 0 .25rem; font-size: clamp(1.6rem, 2.5vw, 2.25rem); line-height: 1.2; }
+        .actualite-title { margin: .25rem 0 .25rem; font-size: clamp(1.5rem, 3.2vw, 2.25rem); line-height: 1.2; }
         .actualite-date { color: #666; display:block; margin-bottom: .75rem; }
         .actualite-cover { margin: 1rem 0; }
         .actualite-cover img { width: 100%; height: auto; border-radius: 10px; display:block; }
@@ -139,6 +143,8 @@ export default function ActualiteDetail() {
         .lfl-skeleton { background: #f3f3f3; border-radius: 8px; }
         .lfl-skeleton--title { height: 28px; width: 60%; margin: 1rem 0; }
         .lfl-skeleton--block { height: 180px; width: 100%; }
+        .container.actualite-detail { max-width: 1000px; margin-inline: auto; padding-inline: 1rem; }
+        .actualite-header { margin-top: .25rem; }
       `}</style>
     </main>
   );
