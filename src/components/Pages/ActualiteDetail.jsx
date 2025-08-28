@@ -37,8 +37,7 @@ export default function ActualiteDetail() {
 
   const coverUrl = useMemo(() => {
     if (!item) return null;
-    // Strapi article -> media field is `cover` (as per backend schema)
-    // `normalizeArticle` already flattens media into an object with `.formats`/`.url`
+    // Strapi article -> media field is `cover` (primary), fallback to `image`
     const node = item.cover || item.image || null;
     const mediaPath =
       node?.formats?.large?.url ||
@@ -46,9 +45,17 @@ export default function ActualiteDetail() {
       node?.formats?.small?.url ||
       node?.url ||
       null;
-    // If no media found, return a placeholder path (served from /public/images)
-    const path = mediaPath || "/images/news-placeholder.jpg";
-    return absoluteMediaUrl(path);
+
+    // Placeholder served by the FRONT (public/images). Do NOT run through absoluteMediaUrl.
+    const rawPath = mediaPath || "/images/news-placeholder.jpg";
+
+    // If it's a Strapi asset path or an absolute URL, normalize through absoluteMediaUrl.
+    if (typeof rawPath === "string" && (rawPath.startsWith("/uploads") || rawPath.startsWith("http"))) {
+      return absoluteMediaUrl(rawPath);
+    }
+
+    // Otherwise it is a front-end asset (e.g. /images/...), keep as-is
+    return rawPath;
   }, [item]);
 
   if (loading) {

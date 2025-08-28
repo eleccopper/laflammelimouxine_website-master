@@ -119,6 +119,8 @@ const ActualitesList = () => {
                 mediaNode?.formats?.small?.url ||
                 mediaNode?.url ||
                 "/images/news-placeholder.jpg";
+              const isFrontAsset = typeof imgPath === 'string' && imgPath.startsWith('/images/');
+              const imgSrc = isFrontAsset ? imgPath : absoluteMediaUrl(imgPath);
 
               return (
                 <article className="article-card" key={actu.id}>
@@ -126,8 +128,8 @@ const ActualitesList = () => {
                     <div className="actu-cover">
                       {imgPath ? (
                         <img
-                          src={absoluteMediaUrl(imgPath)}
-                          alt={actu.title}
+                          src={imgSrc}
+                          alt={mediaNode?.alt || mediaNode?.alternativeText || actu.title}
                           loading="lazy"
                         />
                       ) : (
