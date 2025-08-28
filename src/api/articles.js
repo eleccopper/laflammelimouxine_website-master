@@ -128,7 +128,7 @@ export async function fetchActualites(opts = {}) {
   } = opts;
 
   const qs = buildQS({
-    populate: { cover: "*", tags: "true" },
+    populate: { cover: "*" },
     sort,
     pagination: { page, pageSize },
     ...(search
@@ -138,12 +138,10 @@ export async function fetchActualites(opts = {}) {
           "filters[$or][2][content][$containsi]": search,
         }
       : {}),
-    ...(tags
-      ? { "filters[tags][$in]": Array.isArray(tags) ? tags : [tags] }
-      : {}),
+    // tags filter removed as per instructions
   });
 
-  const data = await http(`/articles${qs}`);
+  const data = await http(`/api/articles${qs}`);
   const items = Array.isArray(data?.data) ? data.data.map(normalizeArticle) : [];
   const pagination = data?.meta?.pagination || { page, pageSize, pageCount: 1, total: items.length };
   return { items, pagination };
@@ -154,12 +152,12 @@ export async function fetchActualites(opts = {}) {
  */
 export async function fetchActualiteBySlug(slug) {
   const qs = buildQS({
-    populate: { cover: "*", tags: "true" },
+    populate: { cover: "*" },
     "filters[slug][$eq]": slug,
     publicationState: "live",
   });
 
-  const data = await http(`/articles${qs}`);
+  const data = await http(`/api/articles${qs}`);
   const items = Array.isArray(data?.data) ? data.data.map(normalizeArticle) : [];
   return items[0] || null;
 }
