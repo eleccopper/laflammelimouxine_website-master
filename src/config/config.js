@@ -1,5 +1,5 @@
 const STRAPI_URL =
-  process.env.REACT_APP_STRAPI_URL || "https://lfl-back-73da1a8c4e08.herokuapp.com/api";
+  process.env.REACT_APP_STRAPI_URL || "https://lfl-back-73da1a8c4e08.herokuapp.com";
 
 const config = {
     strapiUrl: STRAPI_URL,

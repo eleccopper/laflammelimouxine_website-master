@@ -28,7 +28,7 @@ export default function ProductsPage() {
     const strapiUrl = config.strapiUrl;
 
     useEffect(() => {
-        fetch(`${strapiUrl}/api/products?populate=*`)
+        fetch(`${strapiUrl}/products?populate=*`)
             .then(response => response.json())
             .then(data => {
                 if (Array.isArray(data.data)) {
@@ -39,7 +39,7 @@ export default function ProductsPage() {
             })
             .catch(error => console.error('Error fetching products:', error));
 
-        fetch(`${strapiUrl}/api/categories?populate=*`)
+        fetch(`${strapiUrl}/categories?populate=*`)
             .then(response => response.json())
             .then(data => {
                 if (Array.isArray(data.data)) {

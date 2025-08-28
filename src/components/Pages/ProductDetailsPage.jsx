@@ -56,18 +56,18 @@ export default function ProductDetailsPage() {
                 const requestedPath = `/products/${slug}`;
 
                 // 1) Try by href
-                let res = await fetch(`${API}/api/products?filters[href][$eq]=${encodeURIComponent(requestedPath)}&populate=*`);
+                let res = await fetch(`${API}/products?filters[href][$eq]=${encodeURIComponent(requestedPath)}&populate=*`);
                 let json = await res.json();
 
                 // 2) Fallback by slug
                 if (!json?.data?.length) {
-                    res = await fetch(`${API}/api/products?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`);
+                    res = await fetch(`${API}/products?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`);
                     json = await res.json();
                 }
 
                 // 3) Fallback by id/documentId (compatibility)
                 if (!json?.data?.length) {
-                    res = await fetch(`${API}/api/products/${encodeURIComponent(slug)}?populate=*`);
+                    res = await fetch(`${API}/products/${encodeURIComponent(slug)}?populate=*`);
                     json = await res.json();
                     // Single entity style { data: {...} }
                     if (json?.data) {
