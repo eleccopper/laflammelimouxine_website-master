@@ -94,7 +94,7 @@ function normalizeArticle(entity) {
   const a = entity.attributes || entity;
 
   // image/cover (media) — support both field names
-  const mediaSource = a.image || a.cover;
+  const mediaSource = a.cover || a.image;
   const cover = pickFirstMedia(mediaSource);
   const image = cover; // alias
 
@@ -134,10 +134,8 @@ export async function fetchActualites(opts = {}) {
   } = opts;
 
   const params = new URLSearchParams();
-  // Use repeated keys to satisfy Strapi validator: populate=image&populate=cover
-  params.delete("populate");
-  params.append("populate", "image");
-  params.append("populate", "cover");
+  // Simpler and robust for Strapi v4: fetch all needed relations (image/cover)
+  params.set("populate", "*");
   params.set("sort", sort);
   params.set("pagination[page]", String(page));
   params.set("pagination[pageSize]", String(pageSize));
@@ -160,10 +158,8 @@ export async function fetchActualites(opts = {}) {
  */
 export async function fetchActualiteBySlug(slug) {
   const params = new URLSearchParams();
-  // Use repeated keys to satisfy Strapi validator: populate=image&populate=cover
-  params.delete("populate");
-  params.append("populate", "image");
-  params.append("populate", "cover");
+  // Fetch all relations to ensure image/cover is present
+  params.set("populate", "*");
   params.set("publicationState", "live");
   params.set("filters[slug][$eq]", slug);
   const qs = `?${params.toString()}`;
