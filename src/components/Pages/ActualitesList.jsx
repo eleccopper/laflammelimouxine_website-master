@@ -110,26 +110,33 @@ const ActualitesList = () => {
         ) : (
           <div className="articles-list">
             {items.map((actu) => {
-              const media = actu?.image || actu?.cover;
-              const img =
-                media?.formats?.large?.url ||
-                media?.formats?.medium?.url ||
-                media?.formats?.small?.url ||
-                media?.url ||
+              // Media node can be either flattened (with .formats/.url) or Strapi v4 { data: { attributes: ... } }
+              const mediaNode =
+                actu?.image?.data?.attributes ||
+                actu?.cover?.data?.attributes ||
+                actu?.image ||
+                actu?.cover ||
+                null;
+
+              const imgPath =
+                mediaNode?.formats?.large?.url ||
+                mediaNode?.formats?.medium?.url ||
+                mediaNode?.formats?.small?.url ||
+                mediaNode?.url ||
                 null;
 
               return (
                 <article className="article-card" key={actu.id}>
-                  <Link to={`/actualites/${actu.slug}`} className="actu-cover-link" aria-label={actu.title}>
+                  <Link to={`/actualites/${actu.slug || actu.id}`} className="actu-cover-link" aria-label={actu.title}>
                     <div className="actu-cover">
-                      {img ? (
+                      {imgPath ? (
                         <img
-                          src={absoluteMediaUrl(img)}
+                          src={absoluteMediaUrl(imgPath)}
                           alt={actu.title}
                           loading="lazy"
                         />
                       ) : (
-                        <div className="actu-cover placeholder" />
+                        <div className="actu-cover placeholder" aria-hidden="true" />
                       )}
                     </div>
                   </Link>
@@ -139,11 +146,11 @@ const ActualitesList = () => {
                       {formatDate(actu.publishedAt || actu.date || actu.createdAt)}
                     </time>
                     <h2 className="actu-title">
-                      <Link to={`/actualites/${actu.slug}`}>{actu.title}</Link>
+                      <Link to={`/actualites/${actu.slug || actu.id}`}>{actu.title}</Link>
                     </h2>
                     {actu.excerpt && <p className="actu-excerpt">{actu.excerpt}</p>}
                     <div className="actu-actions">
-                      <Link className="btn btn-link" to={`/actualites/${actu.slug}`}>
+                      <Link className="btn btn-link" to={`/actualites/${actu.slug || actu.id}`}>
                         Lire plus
                       </Link>
                     </div>

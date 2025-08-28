@@ -36,10 +36,22 @@ export default function ActualiteDetail() {
   const { loading, error, item } = state;
 
   const coverUrl = useMemo(() => {
-    const media = item?.image || item?.cover; // compat image/cover
-    if (!media) return null;
-    const url = media?.formats?.large?.url || media?.formats?.medium?.url || media?.url;
-    return url ? absoluteMediaUrl(url) : null;
+    if (!item) return null;
+    // support both `image` and `cover`, and both flattened or v4 nested shapes
+    const node =
+      item?.image?.data?.attributes ||
+      item?.cover?.data?.attributes ||
+      item?.image ||
+      item?.cover ||
+      null;
+    if (!node) return null;
+    const p =
+      node?.formats?.large?.url ||
+      node?.formats?.medium?.url ||
+      node?.formats?.small?.url ||
+      node?.url ||
+      null;
+    return p ? absoluteMediaUrl(p) : null;
   }, [item]);
 
   if (loading) {
@@ -181,7 +193,7 @@ export default function ActualiteDetail() {
           <header className="actualite-header">
             <h1 className="actualite-title">{item.title}</h1>
             {published && (
-              <time dateTime={item.publishedAt} className="actualite-date">
+              <time dateTime={item.publishedAt || item.date || item.createdAt || ""} className="actualite-date">
                 {published}
               </time>
             )}
