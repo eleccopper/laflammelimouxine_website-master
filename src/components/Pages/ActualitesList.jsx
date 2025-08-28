@@ -110,20 +110,15 @@ const ActualitesList = () => {
         ) : (
           <div className="articles-list">
             {items.map((actu) => {
-              // Media node can be either flattened (with .formats/.url) or Strapi v4 { data: { attributes: ... } }
-              const mediaNode =
-                actu?.image?.data?.attributes ||
-                actu?.cover?.data?.attributes ||
-                actu?.image ||
-                actu?.cover ||
-                null;
+              // Normalized by articles.js -> actu.cover is a flattened media object { url, formats } or null
+              const mediaNode = actu?.cover || null;
 
               const imgPath =
                 mediaNode?.formats?.large?.url ||
                 mediaNode?.formats?.medium?.url ||
                 mediaNode?.formats?.small?.url ||
                 mediaNode?.url ||
-                null;
+                "/images/news-placeholder.jpg";
 
               return (
                 <article className="article-card" key={actu.id}>

@@ -37,21 +37,18 @@ export default function ActualiteDetail() {
 
   const coverUrl = useMemo(() => {
     if (!item) return null;
-    // support both `image` and `cover`, and both flattened or v4 nested shapes
-    const node =
-      item?.image?.data?.attributes ||
-      item?.cover?.data?.attributes ||
-      item?.image ||
-      item?.cover ||
-      null;
-    if (!node) return null;
-    const p =
+    // Strapi article -> media field is `cover` (as per backend schema)
+    // `normalizeArticle` already flattens media into an object with `.formats`/`.url`
+    const node = item.cover || item.image || null;
+    const mediaPath =
       node?.formats?.large?.url ||
       node?.formats?.medium?.url ||
       node?.formats?.small?.url ||
       node?.url ||
       null;
-    return p ? absoluteMediaUrl(p) : null;
+    // If no media found, return a placeholder path (served from /public/images)
+    const path = mediaPath || "/images/news-placeholder.jpg";
+    return absoluteMediaUrl(path);
   }, [item]);
 
   if (loading) {
@@ -197,16 +194,14 @@ export default function ActualiteDetail() {
                 {published}
               </time>
             )}
-            {coverUrl && (
-              <figure className="actualite-cover">
-                <img
-                  src={coverUrl}
-                  alt={item.title || "Image d’illustration de l’article"}
-                  loading="eager"
-                  className="article-detail-hero"
-                />
-              </figure>
-            )}
+            <figure className="actualite-cover">
+              <img
+                src={coverUrl}
+                alt={item.title || "Image d’illustration de l’article"}
+                loading="eager"
+                className="article-detail-hero"
+              />
+            </figure>
           </header>
 
           {item.excerpt && <p className="actualite-excerpt">{item.excerpt}</p>}

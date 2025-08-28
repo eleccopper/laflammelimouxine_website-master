@@ -94,7 +94,7 @@ function normalizeArticle(entity) {
   const a = entity.attributes || entity;
 
   // cover (media)
-  const cover = pickFirstMedia(a.image || a.cover);
+  const cover = pickFirstMedia(a.cover);
   const image = cover;
 
   // tags: string[] ou relation → on renvoie un tableau de strings
@@ -133,7 +133,7 @@ export async function fetchActualites(opts = {}) {
   } = opts;
 
   const qs = buildQS({
-    populate: "*",
+    populate: { cover: "*" },
     sort,
     pagination: { page, pageSize },
     publicationState: "live",
@@ -158,7 +158,7 @@ export async function fetchActualites(opts = {}) {
  */
 export async function fetchActualiteBySlug(slug) {
   const qs = buildQS({
-    populate: "*",
+    populate: { cover: "*" },
     "filters[slug][$eq]": slug,
     publicationState: "live",
   });
