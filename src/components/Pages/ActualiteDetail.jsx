@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { fetchActualiteBySlug } from "../../api/articles";
 import { absoluteMediaUrl } from "../../utils/strapiUrl";
 import "../../styles/articles.css";
+import { getBestImageUrl } from "../../utils/images";
 
 // Page détail d'une actualité : /actualites/:slug
 export default function ActualiteDetail() {
@@ -37,25 +38,32 @@ export default function ActualiteDetail() {
 
   const coverUrl = useMemo(() => {
     if (!item) return null;
-    // Strapi article -> media field is `cover` (primary), fallback to `image`
-    const node = item.cover || item.image || null;
-    const mediaPath =
-      node?.formats?.large?.url ||
-      node?.formats?.medium?.url ||
-      node?.formats?.small?.url ||
-      node?.url ||
-      null;
+    // Priorité : champ media principal `cover`, puis fallback `image`
+    const media = item.cover || item.image || null;
 
-    // Placeholder served by the FRONT (public/images). Do NOT run through absoluteMediaUrl.
-    const rawPath = mediaPath || "/images/news-placeholder.jpg";
+    // Tente d'abord via l'utilitaire commun (gère formats + URLs absolues/relatives)
+    const best = getBestImageUrl(media);
+    if (best) return best;
 
-    // If it's a Strapi asset path or an absolute URL, normalize through absoluteMediaUrl.
-    if (typeof rawPath === "string" && (rawPath.startsWith("/uploads") || rawPath.startsWith("http"))) {
-      return absoluteMediaUrl(rawPath);
+    // Si `media` est déjà une URL string (Cloudinary ou autre), normaliser/absolutiser
+    if (typeof media === "string") {
+      return absoluteMediaUrl(media);
     }
 
-    // Otherwise it is a front-end asset (e.g. /images/...), keep as-is
-    return rawPath;
+    // Sinon, tente de parcourir l'objet brute (au cas où), puis fallback placeholder du FRONT
+    const direct =
+      media?.formats?.large?.url ||
+      media?.formats?.medium?.url ||
+      media?.formats?.small?.url ||
+      media?.url ||
+      null;
+
+    if (direct) {
+      return absoluteMediaUrl(direct);
+    }
+
+    // Fallback image locale (ne pas passer par absoluteMediaUrl)
+    return "/images/news-placeholder.jpg";
   }, [item]);
 
   if (loading) {
