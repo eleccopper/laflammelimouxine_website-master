@@ -5,34 +5,74 @@ import { absoluteMediaUrl } from './strapiUrl';
 // and avoid blurry thumbnails by preferring larger formats.
 
 /**
+ * Normalize any Strapi media field shape into a simple media object
+ * that contains { url, formats? }. Handles:
+ *  - string URL
+ *  - flattened media (url, formats)
+ *  - nested v4/v5 { data: { attributes: { ... } } }
+ *  - arrays (takes the first element)
+ */
+const normalizeMedia = (input) => {
+  if (!input) return null;
+
+  // If an array of media is passed, use the first one
+  if (Array.isArray(input)) {
+    return normalizeMedia(input[0]);
+  }
+
+  // If a plain string is passed, treat it as the url
+  if (typeof input === 'string') {
+    return { url: input };
+  }
+
+  // Strapi nested shape: { data: {...} } or { data: [{...}] }
+  if (input?.data) {
+    const node = Array.isArray(input.data) ? input.data[0] : input.data;
+    const attrs = node?.attributes || node;
+    if (attrs) return attrs;
+  }
+
+  // Some responses flatten directly to attributes-like object
+  if (input?.attributes) return input.attributes;
+
+  // Otherwise assume it's already a media object
+  return input;
+};
+
+/**
  * Pick the best image URL available from a Strapi media field.
  * Supports both nested (v4/v5) and flattened objects.
  *
- * @param {object} img        Strapi media object (may be nested under img.data.attributes)
- * @param {number} wantWidth  Target display width in px (default 1200)
- * @returns {string}          Best URL to use
+ * @param {object|string|array} img  Strapi media (string URL, object, or array)
+ * @param {number} wantWidth         Target display width in px (default 1200)
+ * @returns {string}                 Absolute best URL to use
  */
 export const getBestImageUrl = (img, wantWidth = 1200) => {
-  if (!img) return '';
-
-  // Support both flattened media (img.url, img.formats) and nested (img.data.attributes)
-  const media = img?.data?.attributes ? img.data.attributes : img;
+  const media = normalizeMedia(img);
   if (!media) return '';
 
   const formats = media.formats || {};
   const candidates = [
     { w: 1600, u: formats.large?.url },
+    { w: 1200, u: formats.xlarge?.url }, // in case a custom size exists
     { w: 1000, u: formats.medium?.url },
     { w: 600,  u: formats.small?.url },
     { w: 245,  u: formats.thumbnail?.url },
-  ].filter((c) => c.u);
+  ].filter((c) => !!c.u);
 
-  // Prefer the smallest format that is >= wantWidth, otherwise fallback to the largest available
-  // Sort candidates by width ascending
-  const sorted = [...candidates].sort((a, b) => a.w - b.w);
-  // Find the smallest available format larger than wantWidth
-  const best = sorted.find((c) => c.w >= wantWidth) || sorted[sorted.length - 1];
-  return best?.u || media.url || '';
+  // Sort by width ascending and choose the smallest >= wantWidth,
+  // else fallback to the largest available format
+  const sorted = candidates.sort((a, b) => a.w - b.w);
+  const picked = sorted.find((c) => c.w >= wantWidth) || sorted[sorted.length - 1];
+
+  let url = picked?.u || media.url || '';
+  if (!url) return '';
+
+  // If relative, convert to absolute using backend URL
+  if (!/^https?:\/\//i.test(url)) {
+    url = absoluteMediaUrl(url);
+  }
+  return url;
 };
 
 /**
@@ -52,7 +92,6 @@ export const withCloudinaryTransform = (url, opts = {}) => {
   const { width, quality = 'auto', format = 'auto' } = opts;
 
   // Cloudinary URL structure: https://res.cloudinary.com/<cloud>/image/upload/<transformations>/v.../path
-  // Insert transformations right after '/upload/'
   const marker = '/upload/';
   const idx = url.indexOf(marker);
   if (idx === -1) return url;
@@ -63,7 +102,6 @@ export const withCloudinaryTransform = (url, opts = {}) => {
   if (quality) parts.push(`q_${quality}`);
   const transform = parts.join(',');
 
-  // If there are already transformations, append ours at the beginning
   const before = url.slice(0, idx + marker.length);
   const after = url.slice(idx + marker.length);
 

@@ -74,17 +74,43 @@ async function http(path, init) {
 /** Normalize Strapi v4 entity to flat article */
 function pickFirstMedia(media) {
   if (!media) return null;
-  // Strapi: media.data peut être objet (single) ou tableau
+
+  // 1) If it's already a URL string
+  if (typeof media === 'string') {
+    return {
+      url: media,
+      formats: null,
+      mime: null,
+      width: undefined,
+      height: undefined,
+      alt: '',
+    };
+  }
+
+  // 2) If it's a flattened media object (Strapi sometimes returns this when populate=* and providers like Cloudinary)
+  if (media.url || media.formats || media.mime) {
+    const a = media;
+    return {
+      url: a.url || null,
+      formats: a.formats || null,
+      mime: a.mime || null,
+      width: a.width,
+      height: a.height,
+      alt: a.alternativeText || a.caption || a.name || '',
+    };
+  }
+
+  // 3) Standard Strapi v4/v5 relational shape: { data: {...} } or { data: [{...}] }
   const m = Array.isArray(media.data) ? media.data[0] : media.data;
-  if (!m || !m.attributes) return null;
-  const a = m.attributes;
+  if (!m) return null;
+  const a = m.attributes || m;
   return {
     url: a.url || null,
     formats: a.formats || null,
     mime: a.mime || null,
     width: a.width,
     height: a.height,
-    alt: a.alternativeText || a.name || "",
+    alt: a.alternativeText || a.name || '',
   };
 }
 
