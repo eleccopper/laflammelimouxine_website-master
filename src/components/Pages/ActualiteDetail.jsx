@@ -36,34 +36,47 @@ export default function ActualiteDetail() {
 
   const { loading, error, item } = state;
 
-  const coverUrl = useMemo(() => {
-    if (!item) return null;
-    // Priorité : champ media principal `cover`, puis fallback `image`
+  // Déduire la meilleure image (src + srcSet) depuis cover/image (Cloudinary ou Strapi local)
+  const coverMedia = useMemo(() => {
+    if (!item) return { src: null, srcSet: null };
+
+    // 1) media brut depuis l'item (priorité cover, fallback image)
     const media = item.cover || item.image || null;
 
-    // Tente d'abord via l'utilitaire commun (gère formats + URLs absolues/relatives)
-    const best = getBestImageUrl(media);
-    if (best) return best;
-
-    // Si `media` est déjà une URL string (Cloudinary ou autre), normaliser/absolutiser
-    if (typeof media === "string") {
-      return absoluteMediaUrl(media);
+    // 2) Essayez d'abord l'utilitaire commun
+    const bestFromUtil = getBestImageUrl(media);
+    if (bestFromUtil) {
+      return { src: bestFromUtil, srcSet: null };
     }
 
-    // Sinon, tente de parcourir l'objet brute (au cas où), puis fallback placeholder du FRONT
-    const direct =
-      media?.formats?.large?.url ||
-      media?.formats?.medium?.url ||
-      media?.formats?.small?.url ||
-      media?.url ||
-      null;
+    // 3) Récupération de l'objet "attributes" possible (Strapi v4/v5)
+    const m =
+      (media && media.attributes) ? media.attributes :
+      (media && media.data && media.data.attributes) ? media.data.attributes :
+      media;
 
-    if (direct) {
-      return absoluteMediaUrl(direct);
-    }
+    // 4) Construire src + srcSet à partir des formats (Cloudinary fournit URLs absolues)
+    const urlLarge   = m?.formats?.large?.url   || null;
+    const urlMedium  = m?.formats?.medium?.url  || null;
+    const urlSmall   = m?.formats?.small?.url   || null;
+    const urlDefault = m?.url || null;
 
-    // Fallback image locale (ne pas passer par absoluteMediaUrl)
-    return "/images/news-placeholder.jpg";
+    // Normaliser en URLs absolues (ne préfixe pas si déjà http)
+    const toAbs = (u) => {
+      if (!u) return null;
+      return /^https?:\/\//i.test(u) ? u : absoluteMediaUrl(u);
+    };
+
+    const src = toAbs(urlLarge || urlMedium || urlSmall || urlDefault) || "/images/news-placeholder.jpg";
+
+    // srcSet (si formats dispo) — utile pour netteté et perf
+    const srcSetParts = [];
+    if (urlSmall)  srcSetParts.push(`${toAbs(urlSmall)} 500w`);
+    if (urlMedium) srcSetParts.push(`${toAbs(urlMedium)} 750w`);
+    if (urlLarge)  srcSetParts.push(`${toAbs(urlLarge)} 1000w`);
+    const srcSet = srcSetParts.length ? srcSetParts.join(", ") : null;
+
+    return { src, srcSet };
   }, [item]);
 
   if (loading) {
@@ -209,14 +222,18 @@ export default function ActualiteDetail() {
                 {published}
               </time>
             )}
-            <figure className="actualite-cover">
-              <img
-                src={coverUrl}
-                alt={item.title || "Image d’illustration de l’article"}
-                loading="eager"
-                className="article-detail-hero"
-              />
-            </figure>
+            {coverMedia?.src && (
+              <figure className="actualite-cover">
+                <img
+                  src={coverMedia.src}
+                  srcSet={coverMedia.srcSet || undefined}
+                  sizes="(max-width: 768px) 100vw, 900px"
+                  alt={item.title || "Image d’illustration de l’article"}
+                  loading="eager"
+                  className="article-detail-hero"
+                />
+              </figure>
+            )}
           </header>
 
           {item.excerpt && <p className="actualite-excerpt">{item.excerpt}</p>}

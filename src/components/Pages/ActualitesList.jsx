@@ -15,6 +15,42 @@ const ActualitesList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // --- Helpers to normalize Strapi v4/v5 responses & media ---
+  const pickMediaUrl = (media) => {
+    if (!media) return null;
+    // Strapi upload object from Cloudinary or local:
+    // - direct: { url, formats }
+    // - nested: { data: { attributes: { url, formats } } }
+    const node = media?.data?.attributes || media;
+    const candidate =
+      node?.formats?.large?.url ||
+      node?.formats?.medium?.url ||
+      node?.formats?.small?.url ||
+      node?.url ||
+      null;
+    if (!candidate) return null;
+    // If it's a front asset (/images/...), keep as-is; otherwise absolutize with backend base
+    return typeof candidate === 'string' && candidate.startsWith('/images/')
+      ? candidate
+      : absoluteMediaUrl(candidate);
+  };
+
+  const normalizeArticle = (raw) => {
+    // Accept either flattened item or Strapi { id, attributes } shape
+    const a = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw || {};
+    return {
+      id: a.documentId || a.id,
+      title: a.title || '',
+      slug: a.slug || a.documentId || a.id?.toString?.() || '',
+      excerpt: a.excerpt || '',
+      content: a.content || '',
+      publishedAt: a.publishedAt || a.createdAt || null,
+      coverUrl: pickMediaUrl(a.cover) || pickMediaUrl(a.image) || '/images/news-placeholder.jpg',
+      // Keep original for alt text
+      _alt: a.cover?.alternativeText || a.image?.alternativeText || a.title || 'Actualité',
+    };
+  };
+
   // Format de date FR mémorisé
   const formatDate = useMemo(
     () => (iso) =>
@@ -109,27 +145,16 @@ const ActualitesList = () => {
           </div>
         ) : (
           <div className="articles-list">
-            {items.map((actu) => {
-              // Normalized by articles.js -> actu.cover is a flattened media object { url, formats } or null
-              const mediaNode = actu?.cover || null;
-
-              const imgPath =
-                mediaNode?.formats?.large?.url ||
-                mediaNode?.formats?.medium?.url ||
-                mediaNode?.formats?.small?.url ||
-                mediaNode?.url ||
-                "/images/news-placeholder.jpg";
-              const isFrontAsset = typeof imgPath === 'string' && imgPath.startsWith('/images/');
-              const imgSrc = isFrontAsset ? imgPath : absoluteMediaUrl(imgPath);
-
+            {items.map((raw) => {
+              const item = normalizeArticle(raw);
               return (
-                <article className="article-card" key={actu.id}>
-                  <Link to={`/actualites/${actu.slug || actu.id}`} className="actu-cover-link" aria-label={actu.title}>
+                <article className="article-card" key={item.id}>
+                  <Link to={`/actualites/${item.slug}`} className="actu-cover-link" aria-label={item.title}>
                     <div className="actu-cover">
-                      {imgPath ? (
+                      {item.coverUrl ? (
                         <img
-                          src={imgSrc}
-                          alt={mediaNode?.alt || mediaNode?.alternativeText || actu.title}
+                          src={item.coverUrl}
+                          alt={item._alt}
                           loading="lazy"
                         />
                       ) : (
@@ -139,15 +164,15 @@ const ActualitesList = () => {
                   </Link>
 
                   <div className="article-card-content">
-                    <time className="actu-date" dateTime={(actu.publishedAt || actu.date || actu.createdAt || '')}>
-                      {formatDate(actu.publishedAt || actu.date || actu.createdAt)}
+                    <time className="actu-date" dateTime={item.publishedAt || ''}>
+                      {formatDate(item.publishedAt)}
                     </time>
                     <h2 className="actu-title">
-                      <Link to={`/actualites/${actu.slug || actu.id}`}>{actu.title}</Link>
+                      <Link to={`/actualites/${item.slug}`}>{item.title}</Link>
                     </h2>
-                    {actu.excerpt && <p className="actu-excerpt">{actu.excerpt}</p>}
+                    {item.excerpt && <p className="actu-excerpt">{item.excerpt}</p>}
                     <div className="actu-actions">
-                      <Link className="btn btn-link" to={`/actualites/${actu.slug || actu.id}`}>
+                      <Link className="btn btn-link" to={`/actualites/${item.slug}`}>
                         Lire plus
                       </Link>
                     </div>
