@@ -1,4 +1,20 @@
 
+/* ============================
+   Bandeau supérieur Actualités
+   ============================ */
+.articles-banner {
+  background: #111;
+  color: #fff;
+  text-align: center;
+  padding: 2rem 1rem;
+  margin-bottom: 2rem;
+}
+.articles-banner h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
 
 
 /* ============================
@@ -15,16 +31,17 @@
 
 .article-card {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 420px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .article-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
@@ -94,8 +111,15 @@
 .article-detail p {
   font-size: 1rem;
   color: #444;
-  line-height: 1.8;
+  line-height: 1.9;
   margin-bottom: 1rem;
+}
+
+.article-detail .actu-date {
+  font-size: .95rem;
+  color: #777;
+  margin-bottom: 1rem;
+  display: block;
 }
 
 
@@ -135,6 +159,11 @@
 @media (max-width: 599px) {
   .articles-list { gap: 1.25rem; padding: 1.25rem; }
   .article-card img { height: 180px; }
+}
+
+@media (max-width: 480px) {
+  .article-detail { padding: 1rem; }
+  .articles-banner h1 { font-size: 1.8rem; }
 }
 @media (min-width: 1200px) {
   .article-card img { height: 240px; }

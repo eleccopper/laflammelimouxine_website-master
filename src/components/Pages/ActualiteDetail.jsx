@@ -44,7 +44,7 @@ export default function ActualiteDetail() {
 
   if (loading) {
     return (
-      <main className="container">
+      <main className="container page--article">
         <div className="lfl-skeleton lfl-skeleton--title" />
         <div className="lfl-skeleton lfl-skeleton--block" />
       </main>
@@ -53,7 +53,7 @@ export default function ActualiteDetail() {
 
   if (error) {
     return (
-      <main className="container">
+      <main className="container page--article">
         <h1>Actualité</h1>
         <p role="alert">Une erreur est survenue : {error.message}</p>
         <p><Link to="/actualites">← Retour aux actualités</Link></p>
@@ -63,17 +63,17 @@ export default function ActualiteDetail() {
 
   if (!item) {
     return (
-      <main className="container">
+      <main className="container page--article">
         <h1>Actualité introuvable</h1>
         <p><Link to="/actualites">← Retour aux actualités</Link></p>
       </main>
     );
   }
 
-  const published = formatDate(item.publishedAt);
+  const published = formatDate(item.publishedAt || item.date || item.createdAt);
 
   return (
-    <main className="article-detail">
+    <main className="article-detail page--article">
       <nav aria-label="Fil d’ariane" className="breadcrumb">
         <Link to="/">Accueil</Link>
         <span> / </span>
@@ -96,6 +96,7 @@ export default function ActualiteDetail() {
                 src={coverUrl}
                 alt={item.title || "Image d’illustration de l’article"}
                 loading="eager"
+                className="article-detail-hero"
               />
             </figure>
           )}

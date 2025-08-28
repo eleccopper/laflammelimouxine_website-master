@@ -64,7 +64,7 @@ const ActualitesList = () => {
   );
 
   return (
-    <div className="actualites-wrapper">
+    <div className="page--article actualites-wrapper">
       {/* En‑tête */}
       <header className="actualites-hero">
         <div className="container">
@@ -85,7 +85,7 @@ const ActualitesList = () => {
             ))}
           </div>
         ) : error ? (
-          <div className="actu-empty">
+          <div className="actu-empty" role="alert">
             <p>{error}</p>
             <Link className="btn" to="/">Retour à l’accueil</Link>
           </div>
@@ -97,10 +97,12 @@ const ActualitesList = () => {
         ) : (
           <div className="articles-list">
             {items.map((actu) => {
+              const media = actu?.image || actu?.cover;
               const img =
-                actu?.image?.formats?.large?.url ||
-                actu?.image?.formats?.medium?.url ||
-                actu?.image?.url ||
+                media?.formats?.large?.url ||
+                media?.formats?.medium?.url ||
+                media?.formats?.small?.url ||
+                media?.url ||
                 null;
 
               return (
@@ -120,8 +122,8 @@ const ActualitesList = () => {
                   </Link>
 
                   <div className="article-card-content">
-                    <time className="actu-date" dateTime={actu.publishedAt || ''}>
-                      {formatDate(actu.publishedAt)}
+                    <time className="actu-date" dateTime={(actu.publishedAt || actu.date || actu.createdAt || '')}>
+                      {formatDate(actu.publishedAt || actu.date || actu.createdAt)}
                     </time>
                     <h2 className="actu-title">
                       <Link to={`/actualites/${actu.slug}`}>{actu.title}</Link>
