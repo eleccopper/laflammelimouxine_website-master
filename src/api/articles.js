@@ -1,4 +1,3 @@
-
 import { STRAPI_URL } from "../config/config";
 
 /**
@@ -13,7 +12,7 @@ import { STRAPI_URL } from "../config/config";
  * Normalizes the Strapi response to a flat shape:
  * {
  *   id, slug, title, excerpt, content, publishedAt,
- *   cover: { url, formats? },
+ *   cover: { url, formats?, mime?, width?, height?, alt? },
  *   tags: string[],
  *   source, sourceId, sourceUrl
  * }
@@ -25,15 +24,13 @@ function apiBase() {
   return b.endsWith("/") ? b.slice(0, -1) : b;
 }
 
-
-/** Small helper to build nested Strapi query strings */
+/** Build nested Strapi query strings safely */
 function buildQS(params = {}) {
   const sp = new URLSearchParams();
 
   const append = (key, val) => {
     if (val === undefined || val === null || val === "") return;
     if (Array.isArray(val)) {
-      // encode arrays as repeated keys (works with [$in] etc.)
       val.forEach((v) => append(key, v));
     } else if (typeof val === "object") {
       Object.entries(val).forEach(([k, v]) => append(`${key}[${k}]`, v));
@@ -64,38 +61,43 @@ async function http(path, init) {
     const err = new Error(`HTTP ${res.status} – ${res.statusText}`);
     err.status = res.status;
     err.body = text;
+    // Log pour debug sans casser l'UI
+    console.error("Articles API error:", { url, status: res.status, body: text });
     throw err;
   }
   return res.json();
 }
 
 /** Normalize Strapi v4 entity to flat article */
+function pickFirstMedia(media) {
+  if (!media) return null;
+  // Strapi: media.data peut être objet (single) ou tableau
+  const m = Array.isArray(media.data) ? media.data[0] : media.data;
+  if (!m || !m.attributes) return null;
+  const a = m.attributes;
+  return {
+    url: a.url || null,
+    formats: a.formats || null,
+    mime: a.mime || null,
+    width: a.width,
+    height: a.height,
+    alt: a.alternativeText || a.name || "",
+  };
+}
+
 function normalizeArticle(entity) {
   if (!entity) return null;
-  // Strapi v4: { id, attributes: { ... } }
   const id = entity.id;
   const a = entity.attributes || entity;
 
   // cover (media)
-  let cover = null;
-  const cov = a.cover?.data;
-  if (cov) {
-    const ca = cov.attributes || {};
-    cover = {
-      url: ca.url || null,
-      formats: ca.formats || null,
-      mime: ca.mime || null,
-      width: ca.width,
-      height: ca.height,
-      alt: ca.alternativeText || a.title || "",
-    };
-  }
+  const cover = pickFirstMedia(a.cover);
 
-  // tags may be repeatable text or a relation; handle simple array
+  // tags: string[] ou relation → on renvoie un tableau de strings
   const tags = Array.isArray(a.tags)
     ? a.tags
     : Array.isArray(a.tags?.data)
-    ? a.tags.data.map((t) => (t.attributes?.name || t.attributes?.title || t.id))
+    ? a.tags.data.map((t) => t.attributes?.name || t.attributes?.title || `${t.id}`)
     : [];
 
   return {
@@ -107,7 +109,7 @@ function normalizeArticle(entity) {
     publishedAt: a.publishedAt || a.updatedAt || a.createdAt || null,
     cover,
     tags,
-    source: a.source || "manual",
+    source: a.source || "Manuel",
     sourceId: a.sourceId || null,
     sourceUrl: a.sourceUrl || null,
   };
@@ -115,12 +117,6 @@ function normalizeArticle(entity) {
 
 /**
  * Fetch paginated list of articles
- * @param {Object} opts
- * @param {number} opts.page
- * @param {number} opts.pageSize
- * @param {string} opts.sort - e.g. 'publishedAt:desc'
- * @param {string} [opts.search] - fulltext (optional)
- * @param {string[]|string} [opts.tags] - filter by tags (if present)
  */
 export async function fetchActualites(opts = {}) {
   const {
@@ -132,10 +128,7 @@ export async function fetchActualites(opts = {}) {
   } = opts;
 
   const qs = buildQS({
-    populate: {
-      cover: "*",
-      tags: "true",
-    },
+    populate: { cover: "*", tags: "true" },
     sort,
     pagination: { page, pageSize },
     ...(search
@@ -146,32 +139,25 @@ export async function fetchActualites(opts = {}) {
         }
       : {}),
     ...(tags
-      ? {
-          "filters[tags][$in]": Array.isArray(tags) ? tags : [tags],
-        }
+      ? { "filters[tags][$in]": Array.isArray(tags) ? tags : [tags] }
       : {}),
   });
 
   const data = await http(`/articles${qs}`);
   const items = Array.isArray(data?.data) ? data.data.map(normalizeArticle) : [];
   const pagination = data?.meta?.pagination || { page, pageSize, pageCount: 1, total: items.length };
-
   return { items, pagination };
 }
 
 /**
  * Fetch one article by slug
- * @param {string} slug
  */
 export async function fetchActualiteBySlug(slug) {
   const qs = buildQS({
-    populate: {
-      cover: "*",
-      tags: "true",
-    },
+    populate: { cover: "*", tags: "true" },
     "filters[slug][$eq]": slug,
     publicationState: "live",
-  }); 
+  });
 
   const data = await http(`/articles${qs}`);
   const items = Array.isArray(data?.data) ? data.data.map(normalizeArticle) : [];
