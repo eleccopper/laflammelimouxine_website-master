@@ -35,19 +35,14 @@ export default function ProductDetailsPage() {
         return Number.isFinite(n) ? n : undefined;
     };
 
-    const getMainImage = (p) => {
-        // accept `image`, `images`, or Strapi media shapes
-        const img = p?.image || p?.images || p?.cover;
-        if (!img) return null;
-        // array
-        if (Array.isArray(img)) {
-            const first = img[0]?.url || img[0]?.formats?.large?.url || img[0]?.formats?.medium?.url || img[0]?.formats?.small?.url;
-            return first || null;
-        }
-        // single media with formats
-        const fm = img?.formats;
-        return (fm?.large?.url || fm?.medium?.url || fm?.small?.url || img?.url || null);
-    };
+    // Unified main image resolver: get the best image candidate from productDetails
+    const getMainMedia = (p) => (
+        p?.image ||
+        p?.cover ||
+        p?.attributes?.image ||
+        p?.attributes?.cover ||
+        null
+    );
 
     useEffect(() => {
         const fetchProductDetails = async () => {
@@ -125,7 +120,7 @@ export default function ProductDetailsPage() {
                         <Div className="row">
                             <Div className="col-lg-6">
                                 <img
-                                    src={getBestImageUrl(getMainImage(productDetails) || productDetails.image, 1200)}
+                                    src={getBestImageUrl(getMainMedia(productDetails), 1200)}
                                     alt={productDetails?.title || 'Product Details'}
                                     className="cs-radius_15 w-100"
                                 />
