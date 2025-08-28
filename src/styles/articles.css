@@ -97,3 +97,45 @@
   line-height: 1.8;
   margin-bottom: 1rem;
 }
+
+
+/* ============================
+   Finitions UI – Actualités
+   ============================ */
+
+/* Bouton "Lire plus" plus visible */
+.article-card-content a {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background: #c0392b;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background .2s ease, box-shadow .2s ease, transform .15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+.article-card-content a::after { content: '→'; }
+.article-card-content a:hover {
+  background: #a93226;
+  box-shadow: 0 6px 16px rgba(192,57,43,.25);
+  transform: translateY(-1px);
+}
+
+/* Marges/rythme typographique */
+.article-card-content .actu-date { color:#666; margin-bottom: .35rem; font-size: .92rem; }
+.article-card-content .actu-excerpt { margin: .35rem 0 .75rem; color:#444; }
+
+/* Titre de page (si utilisé) */
+.articles-title { text-align:center; font-size: 2rem; margin: 2rem 0 1rem; color:#222; }
+
+/* Responsive – grille & images des cartes */
+@media (max-width: 599px) {
+  .articles-list { gap: 1.25rem; padding: 1.25rem; }
+  .article-card img { height: 180px; }
+}
+@media (min-width: 1200px) {
+  .article-card img { height: 240px; }
+}

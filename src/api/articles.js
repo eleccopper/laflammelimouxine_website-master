@@ -95,6 +95,7 @@ function normalizeArticle(entity) {
 
   // cover (media)
   const cover = pickFirstMedia(a.image || a.cover);
+  const image = cover;
 
   // tags: string[] ou relation → on renvoie un tableau de strings
   const tags = Array.isArray(a.tags)
@@ -111,6 +112,7 @@ function normalizeArticle(entity) {
     content: a.content || "",
     publishedAt: a.date || a.publishedAt || a.updatedAt || a.createdAt || null,
     cover,
+    image, // alias pour compat côté front
     tags,
     source: a.source || "Manuel",
     sourceId: a.sourceId || null,
@@ -134,6 +136,7 @@ export async function fetchActualites(opts = {}) {
     populate: "*",
     sort,
     pagination: { page, pageSize },
+    publicationState: "live",
     ...(search
       ? {
           "filters[$or][0][title][$containsi]": search,

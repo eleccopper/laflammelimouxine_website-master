@@ -1,55 +1,71 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchActualites } from '../../api/articles';
 import { absoluteMediaUrl } from '../../utils/strapiUrl';
 import '../../styles/articles.css';
 
 /**
- * Liste des actualités
- * - Grille responsive 1/2/3 colonnes
- * - Cartes avec image de couverture, titre, date, extrait + lien "Lire plus"
- * - Skeleton loader pendant le chargement
- * - Message vide lorsqu'il n'y a pas d'articles
+ * Page: Liste des Actualités
+ * - Grille responsive (cartes)
+ * - Skeletons pendant le chargement
+ * - Gestion des erreurs & état vide
  */
 const ActualitesList = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Format de date FR mémorisé
+  const formatDate = useMemo(
+    () => (iso) =>
+      iso
+        ? new Date(iso).toLocaleDateString('fr-FR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        : '',
+    []
+  );
+
   useEffect(() => {
-    let mounted = true;
+    let cancelled = false;
+
     (async () => {
       try {
-        const { items } = await fetchActualites({ page: 1, pageSize: 12 });
-        if (!mounted) return;
-        setItems(items || []);
+        setLoading(true);
+        const { items: data } = await fetchActualites({
+          page: 1,
+          pageSize: 12,
+        });
+        if (!cancelled) setItems(Array.isArray(data) ? data : []);
       } catch (e) {
         console.error('Actualités – fetch error:', e);
-        if (mounted) setError('Impossible de récupérer les actualités pour le moment.');
+        if (!cancelled) setError("Impossible de récupérer les actualités pour le moment.");
       } finally {
-        if (mounted) setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const SkeletonCard = () => (
-    <div className="article-card skeleton">
+    <article className="article-card skeleton" aria-hidden="true">
       <div className="actu-cover" />
       <div className="article-card-content">
-        <div className="actu-date sk-block" />
-        <div className="actu-title sk-block" />
-        <div className="actu-excerpt sk-block" />
+        <div className="sk-line sk-w-40" />
+        <div className="sk-line sk-w-90 sk-lg" />
+        <div className="sk-line sk-w-70" />
       </div>
-    </div>
+    </article>
   );
-
-  const formatDate = (iso) =>
-    iso ? new Date(iso).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
 
   return (
     <div className="actualites-wrapper">
-      {/* En‑tête de section */}
+      {/* En‑tête */}
       <header className="actualites-hero">
         <div className="container">
           <p className="overline">La Flamme Limouxine</p>
@@ -81,24 +97,24 @@ const ActualitesList = () => {
         ) : (
           <div className="articles-list">
             {items.map((actu) => {
-              const cover =
-                actu.cover?.formats?.large?.url ||
-                actu.cover?.formats?.medium?.url ||
-                actu.cover?.url ||
+              const img =
+                actu?.image?.formats?.large?.url ||
+                actu?.image?.formats?.medium?.url ||
+                actu?.image?.url ||
                 null;
 
               return (
                 <article className="article-card" key={actu.id}>
                   <Link to={`/actualites/${actu.slug}`} className="actu-cover-link" aria-label={actu.title}>
                     <div className="actu-cover">
-                      {cover ? (
+                      {img ? (
                         <img
-                          src={absoluteMediaUrl(cover)}
+                          src={absoluteMediaUrl(img)}
                           alt={actu.title}
                           loading="lazy"
                         />
                       ) : (
-                        <div className="actu-cover placeholder" aria-hidden="true" />
+                        <div className="actu-cover placeholder" />
                       )}
                     </div>
                   </Link>
