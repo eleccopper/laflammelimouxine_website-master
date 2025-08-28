@@ -44,96 +44,192 @@ export default function ActualiteDetail() {
 
   if (loading) {
     return (
-      <main className="container page--article">
-        <div className="lfl-skeleton lfl-skeleton--title" />
-        <div className="lfl-skeleton lfl-skeleton--block" />
-      </main>
+      <>
+        <header
+          className="actualites-hero"
+          style={{
+            backgroundImage:
+              "linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/images/actualites.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            color: "#fff"
+          }}
+        >
+          <div className="container">
+            <nav className="breadcrumb" aria-label="Fil d’ariane" style={{ color: "#fff", opacity: 0.9 }}>
+              <Link to="/" style={{ color: "#fff" }}>Accueil</Link>
+              <span> | </span>
+              <Link to="/actualites" style={{ color: "#fff" }}>Actualités</Link>
+            </nav>
+            <h1 className="section-title" style={{ color: "#fff", marginTop: "0.5rem" }}>Actualités</h1>
+            <p className="subtitle" style={{ color: "#fff", maxWidth: 900 }}>
+              Nos chantiers, conseils, nouveautés produits et infos locales autour du poêle et du chauffage.
+            </p>
+          </div>
+        </header>
+        <main className="container page--article">
+          <div className="lfl-skeleton lfl-skeleton--title" />
+          <div className="lfl-skeleton lfl-skeleton--block" />
+        </main>
+      </>
     );
   }
 
   if (error) {
     return (
-      <main className="container page--article">
-        <h1>Actualité</h1>
-        <p role="alert">Une erreur est survenue : {error.message}</p>
-        <p><Link to="/actualites">← Retour aux actualités</Link></p>
-      </main>
+      <>
+        <header
+          className="actualites-hero"
+          style={{
+            backgroundImage:
+              "linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/images/actualites.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            color: "#fff"
+          }}
+        >
+          <div className="container">
+            <nav className="breadcrumb" aria-label="Fil d’ariane" style={{ color: "#fff", opacity: 0.9 }}>
+              <Link to="/" style={{ color: "#fff" }}>Accueil</Link>
+              <span> | </span>
+              <Link to="/actualites" style={{ color: "#fff" }}>Actualités</Link>
+            </nav>
+            <h1 className="section-title" style={{ color: "#fff", marginTop: "0.5rem" }}>Actualités</h1>
+            <p className="subtitle" style={{ color: "#fff", maxWidth: 900 }}>
+              Nos chantiers, conseils, nouveautés produits et infos locales autour du poêle et du chauffage.
+            </p>
+          </div>
+        </header>
+        <main className="container page--article">
+          <h1>Actualité</h1>
+          <p role="alert">Une erreur est survenue : {error.message}</p>
+          <p><Link to="/actualites">← Retour aux actualités</Link></p>
+        </main>
+      </>
     );
   }
 
   if (!item) {
     return (
-      <main className="container page--article">
-        <h1>Actualité introuvable</h1>
-        <p><Link to="/actualites">← Retour aux actualités</Link></p>
-      </main>
+      <>
+        <header
+          className="actualites-hero"
+          style={{
+            backgroundImage:
+              "linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/images/actualites.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            color: "#fff"
+          }}
+        >
+          <div className="container">
+            <nav className="breadcrumb" aria-label="Fil d’ariane" style={{ color: "#fff", opacity: 0.9 }}>
+              <Link to="/" style={{ color: "#fff" }}>Accueil</Link>
+              <span> | </span>
+              <Link to="/actualites" style={{ color: "#fff" }}>Actualités</Link>
+            </nav>
+            <h1 className="section-title" style={{ color: "#fff", marginTop: "0.5rem" }}>Actualités</h1>
+            <p className="subtitle" style={{ color: "#fff", maxWidth: 900 }}>
+              Nos chantiers, conseils, nouveautés produits et infos locales autour du poêle et du chauffage.
+            </p>
+          </div>
+        </header>
+        <main className="container page--article">
+          <h1>Actualité introuvable</h1>
+          <p><Link to="/actualites">← Retour aux actualités</Link></p>
+        </main>
+      </>
     );
   }
 
   const published = formatDate(item.publishedAt || item.date || item.createdAt);
 
   return (
-    <main className="article-detail page--article">
-      <nav aria-label="Fil d’ariane" className="breadcrumb">
-        <Link to="/">Accueil</Link>
-        <span> / </span>
-        <Link to="/actualites">Actualités</Link>
-        <span> / </span>
-        <span aria-current="page">{item.title}</span>
-      </nav>
+    <>
+      <header
+        className="actualites-hero"
+        style={{
+          backgroundImage:
+            "linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/images/actualites.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          color: "#fff"
+        }}
+      >
+        <div className="container">
+          <nav className="breadcrumb" aria-label="Fil d’ariane" style={{ color: "#fff", opacity: 0.9 }}>
+            <Link to="/" style={{ color: "#fff" }}>Accueil</Link>
+            <span> | </span>
+            <Link to="/actualites" style={{ color: "#fff" }}>Actualités</Link>
+          </nav>
+          <h1 className="section-title" style={{ color: "#fff", marginTop: "0.5rem" }}>Actualités</h1>
+          <p className="subtitle" style={{ color: "#fff", maxWidth: 900 }}>
+            Nos chantiers, conseils, nouveautés produits et infos locales autour du poêle et du chauffage.
+          </p>
+        </div>
+      </header>
+      <main className="article-detail page--article">
+        <nav aria-label="Fil d’ariane" className="breadcrumb">
+          <Link to="/">Accueil</Link>
+          <span> / </span>
+          <Link to="/actualites">Actualités</Link>
+          <span> / </span>
+          <span aria-current="page">{item.title}</span>
+        </nav>
 
-      <article>
-        <header className="actualite-header">
-          <h1 className="actualite-title">{item.title}</h1>
-          {published && (
-            <time dateTime={item.publishedAt} className="actualite-date">
-              {published}
-            </time>
+        <article>
+          <header className="actualite-header">
+            <h1 className="actualite-title">{item.title}</h1>
+            {published && (
+              <time dateTime={item.publishedAt} className="actualite-date">
+                {published}
+              </time>
+            )}
+            {coverUrl && (
+              <figure className="actualite-cover">
+                <img
+                  src={coverUrl}
+                  alt={item.title || "Image d’illustration de l’article"}
+                  loading="eager"
+                  className="article-detail-hero"
+                />
+              </figure>
+            )}
+          </header>
+
+          {item.excerpt && <p className="actualite-excerpt">{item.excerpt}</p>}
+
+          <section className="actualite-content">
+            {typeof item.content === "string" ? (
+              <div dangerouslySetInnerHTML={{ __html: item.content }} />
+            ) : Array.isArray(item.content) ? (
+              item.content.map((block, idx) => <p key={idx}>{String(block)}</p>)
+            ) : item.content ? (
+              <p>{String(item.content)}</p>
+            ) : null}
+          </section>
+
+          {Array.isArray(item.tags) && item.tags.length > 0 && (
+            <footer className="actualite-tags">
+              <strong>Mots-clés :</strong>{" "}
+              {item.tags.map((t, i) => {
+                const label = typeof t === "string" ? t : t?.name || t?.title || "";
+                return (
+                  <span key={label + i} className="tag">
+                    {label}
+                    {i < item.tags.length - 1 ? ", " : ""}
+                  </span>
+                );
+              })}
+            </footer>
           )}
-          {coverUrl && (
-            <figure className="actualite-cover">
-              <img
-                src={coverUrl}
-                alt={item.title || "Image d’illustration de l’article"}
-                loading="eager"
-                className="article-detail-hero"
-              />
-            </figure>
-          )}
-        </header>
+        </article>
 
-        {item.excerpt && <p className="actualite-excerpt">{item.excerpt}</p>}
-
-        <section className="actualite-content">
-          {typeof item.content === "string" ? (
-            <div dangerouslySetInnerHTML={{ __html: item.content }} />
-          ) : Array.isArray(item.content) ? (
-            item.content.map((block, idx) => <p key={idx}>{String(block)}</p>)
-          ) : item.content ? (
-            <p>{String(item.content)}</p>
-          ) : null}
-        </section>
-
-        {Array.isArray(item.tags) && item.tags.length > 0 && (
-          <footer className="actualite-tags">
-            <strong>Mots-clés :</strong>{" "}
-            {item.tags.map((t, i) => {
-              const label = typeof t === "string" ? t : t?.name || t?.title || "";
-              return (
-                <span key={label + i} className="tag">
-                  {label}
-                  {i < item.tags.length - 1 ? ", " : ""}
-                </span>
-              );
-            })}
-          </footer>
-        )}
-      </article>
-
-      <p className="back-link">
-        <Link to="/actualites">← Toutes les actualités</Link>
-      </p>
-    </main>
+        <p className="back-link">
+          <Link to="/actualites">← Toutes les actualités</Link>
+        </p>
+      </main>
+    </>
   );
 }
 

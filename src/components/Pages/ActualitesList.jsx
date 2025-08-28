@@ -66,11 +66,24 @@ const ActualitesList = () => {
   return (
     <div className="page--article actualites-wrapper">
       {/* En‑tête */}
-      <header className="actualites-hero">
+      <header
+        className="actualites-hero"
+        style={{
+          backgroundImage:
+            "linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)), url('/images/actualites.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          color: "#fff"
+        }}
+      >
         <div className="container">
-          <p className="overline">La Flamme Limouxine</p>
-          <h1 className="section-title">Actualités</h1>
-          <p className="subtitle">
+          <nav className="breadcrumb" aria-label="Fil d’ariane" style={{ color: "#fff", opacity: 0.9 }}>
+            <Link to="/" style={{ color: "#fff" }}>Accueil</Link>
+            <span> | </span>
+            <span aria-current="page">Actualités</span>
+          </nav>
+          <h1 className="section-title" style={{ color: "#fff", marginTop: "0.5rem" }}>Actualités</h1>
+          <p className="subtitle" style={{ color: "#fff", maxWidth: 900 }}>
             Nos chantiers, conseils, nouveautés produits et infos locales autour du poêle et du chauffage.
           </p>
         </div>
