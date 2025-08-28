@@ -93,9 +93,10 @@ function normalizeArticle(entity) {
   const id = entity.id;
   const a = entity.attributes || entity;
 
-  // cover (media)
-  const cover = pickFirstMedia(a.cover);
-  const image = cover;
+  // image/cover (media) — support both field names
+  const mediaSource = a.image || a.cover;
+  const cover = pickFirstMedia(mediaSource);
+  const image = cover; // alias
 
   // tags: string[] ou relation → on renvoie un tableau de strings
   const tags = Array.isArray(a.tags)
@@ -133,7 +134,9 @@ export async function fetchActualites(opts = {}) {
   } = opts;
 
   const params = new URLSearchParams();
-  params.set("populate", "cover");
+  // populate both possible media fields
+  params.append("populate[image]", "*");
+  params.append("populate[cover]", "*");
   params.set("sort", sort);
   params.set("pagination[page]", String(page));
   params.set("pagination[pageSize]", String(pageSize));
@@ -156,7 +159,9 @@ export async function fetchActualites(opts = {}) {
  */
 export async function fetchActualiteBySlug(slug) {
   const params = new URLSearchParams();
-  params.set("populate", "cover");
+  // populate both possible media fields
+  params.append("populate[image]", "*");
+  params.append("populate[cover]", "*");
   params.set("publicationState", "live");
   params.set("filters[slug][$eq]", slug);
   const qs = `?${params.toString()}`;
