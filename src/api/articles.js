@@ -94,7 +94,7 @@ function normalizeArticle(entity) {
   const a = entity.attributes || entity;
 
   // cover (media)
-  const cover = pickFirstMedia(a.cover);
+  const cover = pickFirstMedia(a.image || a.cover);
 
   // tags: string[] ou relation → on renvoie un tableau de strings
   const tags = Array.isArray(a.tags)
@@ -109,7 +109,7 @@ function normalizeArticle(entity) {
     title: a.title || "",
     excerpt: a.excerpt || "",
     content: a.content || "",
-    publishedAt: a.publishedAt || a.updatedAt || a.createdAt || null,
+    publishedAt: a.date || a.publishedAt || a.updatedAt || a.createdAt || null,
     cover,
     tags,
     source: a.source || "Manuel",
@@ -131,7 +131,7 @@ export async function fetchActualites(opts = {}) {
   } = opts;
 
   const qs = buildQS({
-    populate: { cover: "*" },
+    populate: { image: "*" },
     sort,
     pagination: { page, pageSize },
     ...(search
@@ -155,7 +155,7 @@ export async function fetchActualites(opts = {}) {
  */
 export async function fetchActualiteBySlug(slug) {
   const qs = buildQS({
-    populate: { cover: "*" },
+    populate: { image: "*" },
     "filters[slug][$eq]": slug,
     publicationState: "live",
   });
