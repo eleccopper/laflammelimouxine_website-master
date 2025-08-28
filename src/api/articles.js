@@ -134,9 +134,9 @@ export async function fetchActualites(opts = {}) {
   } = opts;
 
   const params = new URLSearchParams();
-  // populate both possible media fields
-  params.append("populate[image]", "*");
-  params.append("populate[cover]", "*");
+  // populate both possible media fields (index syntax for Strapi validation)
+  params.append("populate[0]", "image");
+  params.append("populate[1]", "cover");
   params.set("sort", sort);
   params.set("pagination[page]", String(page));
   params.set("pagination[pageSize]", String(pageSize));
@@ -159,9 +159,9 @@ export async function fetchActualites(opts = {}) {
  */
 export async function fetchActualiteBySlug(slug) {
   const params = new URLSearchParams();
-  // populate both possible media fields
-  params.append("populate[image]", "*");
-  params.append("populate[cover]", "*");
+  // populate both possible media fields (index syntax for Strapi validation)
+  params.append("populate[0]", "image");
+  params.append("populate[1]", "cover");
   params.set("publicationState", "live");
   params.set("filters[slug][$eq]", slug);
   const qs = `?${params.toString()}`;
