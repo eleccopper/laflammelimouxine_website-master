@@ -132,20 +132,18 @@ export async function fetchActualites(opts = {}) {
     tags,
   } = opts;
 
-  const qs = buildQS({
-    populate: { cover: "*" },
-    sort,
-    pagination: { page, pageSize },
-    publicationState: "live",
-    ...(search
-      ? {
-          "filters[$or][0][title][$containsi]": search,
-          "filters[$or][1][excerpt][$containsi]": search,
-          "filters[$or][2][content][$containsi]": search,
-        }
-      : {}),
-    // tags filter removed as per instructions
-  });
+  const params = new URLSearchParams();
+  params.set("populate", "cover");
+  params.set("sort", sort);
+  params.set("pagination[page]", String(page));
+  params.set("pagination[pageSize]", String(pageSize));
+  params.set("publicationState", "live");
+  if (search && search.trim()) {
+    params.set("filters[$or][0][title][$containsi]", search);
+    params.set("filters[$or][1][excerpt][$containsi]", search);
+    params.set("filters[$or][2][content][$containsi]", search);
+  }
+  const qs = `?${params.toString()}`;
 
   const data = await http(`/articles${qs}`);
   const items = Array.isArray(data?.data) ? data.data.map(normalizeArticle) : [];
@@ -157,11 +155,11 @@ export async function fetchActualites(opts = {}) {
  * Fetch one article by slug
  */
 export async function fetchActualiteBySlug(slug) {
-  const qs = buildQS({
-    populate: { cover: "*" },
-    "filters[slug][$eq]": slug,
-    publicationState: "live",
-  });
+  const params = new URLSearchParams();
+  params.set("populate", "cover");
+  params.set("publicationState", "live");
+  params.set("filters[slug][$eq]", slug);
+  const qs = `?${params.toString()}`;
 
   const data = await http(`/articles${qs}`);
   const items = Array.isArray(data?.data) ? data.data.map(normalizeArticle) : [];
