@@ -1,4 +1,5 @@
 
+import { STRAPI_URL } from "../config/config";
 
 /**
  * Articles (Actualités) API helpers
@@ -18,16 +19,12 @@
  * }
  */
 
-const BASE_URL =
-  (typeof process !== "undefined" && process.env && process.env.REACT_APP_STRAPI_URL) ||
-  "";
-
-/** Ensure we have a base URL without trailing slash */
-function getApiBase() {
-  const b = BASE_URL || "";
+function apiBase() {
+  const b = (STRAPI_URL || "").trim();
   if (!b) return "";
   return b.endsWith("/") ? b.slice(0, -1) : b;
 }
+
 
 /** Small helper to build nested Strapi query strings */
 function buildQS(params = {}) {
@@ -52,8 +49,8 @@ function buildQS(params = {}) {
 
 /** Basic fetch wrapper with graceful errors */
 async function http(path, init) {
-  const api = getApiBase();
-  const url = `${api}${path}`;
+  const api = apiBase();
+  const url = `${api}${path.startsWith('/') ? path : '/' + path}`;
   const res = await fetch(url, {
     headers: {
       Accept: "application/json",
@@ -155,7 +152,7 @@ export async function fetchActualites(opts = {}) {
       : {}),
   });
 
-  const data = await http(`/api/articles${qs}`);
+  const data = await http(`/articles${qs}`);
   const items = Array.isArray(data?.data) ? data.data.map(normalizeArticle) : [];
   const pagination = data?.meta?.pagination || { page, pageSize, pageCount: 1, total: items.length };
 
@@ -176,7 +173,7 @@ export async function fetchActualiteBySlug(slug) {
     publicationState: "live",
   }); 
 
-  const data = await http(`/api/articles${qs}`);
+  const data = await http(`/articles${qs}`);
   const items = Array.isArray(data?.data) ? data.data.map(normalizeArticle) : [];
   return items[0] || null;
 }
