@@ -131,7 +131,7 @@ export async function fetchActualites(opts = {}) {
   } = opts;
 
   const qs = buildQS({
-    populate: { image: "*" },
+    populate: "*",
     sort,
     pagination: { page, pageSize },
     ...(search
@@ -155,7 +155,7 @@ export async function fetchActualites(opts = {}) {
  */
 export async function fetchActualiteBySlug(slug) {
   const qs = buildQS({
-    populate: { image: "*" },
+    populate: "*",
     "filters[slug][$eq]": slug,
     publicationState: "live",
   });
