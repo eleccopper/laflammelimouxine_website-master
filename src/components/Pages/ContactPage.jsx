@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react";
 import React, { useEffect, useState } from "react";
-import emailjs from "emailjs-com";
+import emailjs from "@emailjs/browser";
 import { pageTitle } from "../../helper";
 import Div from "../Div";
 import PageHeading from "../PageHeading";
@@ -22,7 +22,7 @@ export default function ContactPage() {
   useEffect(() => {
     try {
       if (PUB_KEY) {
-        emailjs.init(PUB_KEY);
+        emailjs.init({ publicKey: PUB_KEY });
       } else {
         console.warn("EmailJS: public key manquante (REACT_APP_EMAILJS_PUBLIC_KEY).");
       }
@@ -65,8 +65,7 @@ export default function ContactPage() {
           project_type: formData.projectType,
           phone: formData.mobile,
           message: formData.message,
-        },
-        PUB_KEY
+        }
       )
       .then((response) => {
         console.log("Email envoyé :", response);
