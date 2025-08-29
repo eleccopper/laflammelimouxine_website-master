@@ -26,29 +26,58 @@ export default function ServicesDetailsPage() {
     .replace(/^-+|-+$/g, '');
 
   useEffect(() => {
+    const SLUG_TO_TITLE = {
+      installation: 'Installation',
+      entretien: 'Entretien',
+      vente: 'Vente',
+      sav: 'Dépannage',
+      depannage: 'Dépannage',
+    };
+
     const fetchService = async () => {
       try {
         let data;
-        // 1) SEO route: fetch by slug or by title guess
-        if (slug) {
-          let res = await fetch(`${strapiUrl}/blog-posts?filters[href][$containsi]=${encodeURIComponent(`/services/${slug}`)}&populate=*`);
-          let json = await res.json();
-          if (json?.data?.length) {
-            data = json.data[0];
-          } else {
-            // Fallback: try matching by title reconstructed from slug
-            const titleGuess = decodeURIComponent(slug).replace(/-/g, ' ');
-            res = await fetch(`${strapiUrl}/blog-posts?filters[title][$containsi]=${encodeURIComponent(titleGuess)}&populate=*`);
-            json = await res.json();
-            if (json?.data?.length) data = json.data[0];
+
+        // 1) On déduit un "titre attendu" à partir du slug d'URL
+        const wantedTitle =
+          SLUG_TO_TITLE[slug] ||
+          decodeURIComponent(slug || '').replace(/-/g, ' ').trim();
+
+        // 2) Requête PROPRE uniquement sur un champ existant : "title"
+        //    -> supprime définitivement les 400 "Invalid key slug|href"
+        let url =
+          `${strapiUrl}/blog-posts` +
+          `?filters[title][$containsi]=${encodeURIComponent(wantedTitle)}` +
+          `&populate=*` +
+          `&publicationState=live` +
+          `&pagination[page]=1&pagination[pageSize]=1`;
+
+        let res = await fetch(url);
+        let json = await res.json();
+
+        if (json?.data?.length) {
+          data = json.data[0];
+        } else if (id) {
+          // 3) Fallback legacy par ID direct
+          res = await fetch(`${strapiUrl}/blog-posts/${encodeURIComponent(id)}?populate=*`);
+          json = await res.json();
+          if (json?.data) data = json.data;
+        } else {
+          // 4) Fallback final : on récupère un lot et on filtre côté client
+          res = await fetch(
+            `${strapiUrl}/blog-posts?populate=*&publicationState=live&pagination[page]=1&pagination[pageSize]=50`
+          );
+          json = await res.json();
+          if (Array.isArray(json?.data)) {
+            data =
+              json.data.find((it) =>
+                (it.attributes?.title || '')
+                  .toLowerCase()
+                  .includes((wantedTitle || '').toLowerCase())
+              ) || json.data[0];
           }
         }
-        // 2) Legacy route by id
-        if (!data && id) {
-          const res = await fetch(`${strapiUrl}/blog-posts/${encodeURIComponent(id)}?populate=*`);
-          const json = await res.json();
-          if (json?.data) data = json.data;
-        }
+
         if (data) {
           setBlogData(normalize(data));
         } else {
@@ -67,23 +96,34 @@ export default function ServicesDetailsPage() {
     return <div>Loading...</div>;
   }
 
+  // Image robuste : accepte image OU cover (objet direct ou .data)
+  const pickMedia = (m) => (m?.data ? m.data : m) || null;
+  const media = pickMedia(blogData.image) || pickMedia(blogData.cover);
+  const imgUrl = getBestImageUrl(media, 1200);
+  const imgAlt =
+    media?.attributes?.alternativeText ||
+    blogData?.image?.alternativeText ||
+    blogData?.cover?.alternativeText ||
+    blogData?.title ||
+    'Service image';
+
   return (
     <>
       <PageHeading
-          title={blogData?.title}
-          bgSrc='/images/blog_hero_bg.jpeg'
-          pageLinkText={`${category || 'services'} / ${slug || id}`}
+        title={blogData?.title}
+        bgSrc="/images/blog_hero_bg.jpeg"
+        pageLinkText={`${category || 'services'} / ${slug || id}`}
       />
-      <Spacing lg='150' md='80'/>
+      <Spacing lg="150" md="80" />
       <Div className="container">
         <Div className="row justify-content-center align-items-center">
           <Div className="col-lg-8">
             <Div className="cs-post cs-style2">
               <Div className="cs-post_thumb cs-radius_15">
-                {(blogData?.image || blogData?.image?.data) && (
+                {imgUrl && (
                   <img
-                    src={getBestImageUrl(blogData.image, 1200)}
-                    alt={blogData?.image?.alternativeText || blogData?.image?.data?.attributes?.alternativeText || blogData?.title || 'Service image'}
+                    src={imgUrl}
+                    alt={imgAlt}
                     className="w-100 cs-radius_15"
                     loading="lazy"
                   />
@@ -91,24 +131,29 @@ export default function ServicesDetailsPage() {
               </Div>
               <Div className="cs-post_info">
                 <Div className="cs-post_meta cs-style1 cs-ternary_color cs-semi_bold cs-primary_font">
-                  <Link to={`/services/${makeSlug(blogData?.category)}`} className="cs-post_avatar">
-                    {blogData?.category}
-                  </Link>
+                  {blogData?.category && (
+                    <Link to={`/services/${makeSlug(blogData.category)}`} className="cs-post_avatar">
+                      {blogData.category}
+                    </Link>
+                  )}
                 </Div>
                 <h2 className="cs-post_title">{blogData?.title}</h2>
-                <div className="richtext" dangerouslySetInnerHTML={{ __html: blogData?.content || '' }} />
+                <div
+                  className="richtext"
+                  dangerouslySetInnerHTML={{ __html: blogData?.content || '' }}
+                />
               </Div>
             </Div>
           </Div>
         </Div>
       </Div>
-      <Spacing lg='150' md='80'/>
+      <Spacing lg="150" md="80" />
       <Div className="container text-center">
         <Cta
-            title='Discutons et <br />construisons <i>ensemble</i>'
-            btnText='Nous contacter'
-            btnLink='/contact'
-            bgSrc='/images/cta_bg.jpeg'
+          title="Discutons et <br />construisons <i>ensemble</i>"
+          btnText="Nous contacter"
+          btnLink="/contact"
+          bgSrc="/images/cta_bg.jpeg"
         />
       </Div>
     </>
