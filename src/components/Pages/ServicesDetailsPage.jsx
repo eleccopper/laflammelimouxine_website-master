@@ -31,7 +31,7 @@ export default function ServicesDetailsPage() {
         let data;
         // 1) SEO route: fetch by slug or by title guess
         if (slug) {
-          let res = await fetch(`${strapiUrl}/blog-posts?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`);
+          let res = await fetch(`${strapiUrl}/blog-posts?filters[href][$containsi]=${encodeURIComponent(`/services/${slug}`)}&populate=*`);
           let json = await res.json();
           if (json?.data?.length) {
             data = json.data[0];
