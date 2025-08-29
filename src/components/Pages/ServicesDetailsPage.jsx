@@ -31,22 +31,37 @@ export default function ServicesDetailsPage() {
         let data;
         // 1) SEO route: fetch by slug or by title guess
         if (slug) {
-          let res = await fetch(`${strapiUrl}/blog-posts?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`);
+          let res = await fetch(
+            `${strapiUrl}/blog-posts?filters[slug][$eq]=${encodeURIComponent(slug)}&populate[image]=true&populate[cover]=true&publicationState=live`
+          );
           let json = await res.json();
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status} – ${json?.error?.message || 'Bad Request'}`);
+          }
           if (json?.data?.length) {
             data = json.data[0];
           } else {
             // Fallback: try matching by title reconstructed from slug
             const titleGuess = decodeURIComponent(slug).replace(/-/g, ' ');
-            res = await fetch(`${strapiUrl}/blog-posts?filters[title][$containsi]=${encodeURIComponent(titleGuess)}&populate=*`);
+            res = await fetch(
+              `${strapiUrl}/blog-posts?filters[title][$containsi]=${encodeURIComponent(titleGuess)}&populate[image]=true&populate[cover]=true&publicationState=live`
+            );
             json = await res.json();
+            if (!res.ok) {
+              throw new Error(`HTTP ${res.status} – ${json?.error?.message || 'Bad Request'}`);
+            }
             if (json?.data?.length) data = json.data[0];
           }
         }
         // 2) Legacy route by id
         if (!data && id) {
-          const res = await fetch(`${strapiUrl}/blog-posts/${encodeURIComponent(id)}?populate=*`);
+          const res = await fetch(
+            `${strapiUrl}/blog-posts/${encodeURIComponent(id)}?populate[image]=true&populate[cover]=true&publicationState=live`
+          );
           const json = await res.json();
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status} – ${json?.error?.message || 'Bad Request'}`);
+          }
           if (json?.data) data = json.data;
         }
         if (data) {
