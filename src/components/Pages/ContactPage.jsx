@@ -35,10 +35,10 @@ function readEnv(name, fallback = "") {
   return (fromWindow ?? fromProcess ?? fallback).toString().trim();
 }
 
-// EmailJS configuration (trimmed)
-const PUB_KEY   = readEnv("REACT_APP_EMAILJS_PUBLIC_KEY");
-const SERVICEID = readEnv("REACT_APP_EMAILJS_SERVICE_ID");
-const TEMPLATEID= readEnv("REACT_APP_EMAILJS_TEMPLATE_ID");
+// EmailJS configuration (env first, then fallback to hardcoded constants)
+const PUB_KEY   = readEnv("REACT_APP_EMAILJS_PUBLIC_KEY", PUBLIC_KEY);
+const SERVICEID = readEnv("REACT_APP_EMAILJS_SERVICE_ID", SERVICE_ID);
+const TEMPLATEID= readEnv("REACT_APP_EMAILJS_TEMPLATE_ID", TEMPLATE_ID);
 
 export default function ContactPage() {
   pageTitle("Nous contacter");
@@ -56,16 +56,15 @@ export default function ContactPage() {
 
   useEffect(() => {
     try {
-      if (PUB_KEY) {
-        // Init EmailJS once
-        emailjs.init({ publicKey: PUB_KEY });
-        // Masked debug logs (utile pour diagnostiquer sans exposer la clé)
+      const keyToUse = PUB_KEY || PUBLIC_KEY;
+      if (keyToUse) {
+        emailjs.init({ publicKey: keyToUse });
         const masked =
-          PUB_KEY.length >= 6 ? `${PUB_KEY.slice(0,3)}…${PUB_KEY.slice(-3)}` : "(short)";
+          keyToUse.length >= 6 ? `${keyToUse.slice(0,3)}…${keyToUse.slice(-3)}` : "(short)";
         console.log("EmailJS init OK – key:", masked);
-        console.log("EmailJS service/template:", SERVICEID || "(none)", TEMPLATEID || "(none)");
+        console.log("EmailJS service/template:", (SERVICEID || SERVICE_ID) || "(none)", (TEMPLATEID || TEMPLATE_ID) || "(none)");
       } else {
-        console.warn("EmailJS: public key manquante (REACT_APP_EMAILJS_PUBLIC_KEY).");
+        console.warn("EmailJS: aucune public key fournie (ni env, ni fallback).");
       }
     } catch (e) {
       console.error("EmailJS init error:", e);
@@ -79,18 +78,24 @@ export default function ContactPage() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+
+    // Effective config (env first, fallback to hardcoded)
+    const EFFECTIVE_SERVICE = SERVICEID || SERVICE_ID;
+    const EFFECTIVE_TEMPLATE = TEMPLATEID || TEMPLATE_ID;
+    const EFFECTIVE_PUBLIC_KEY = PUB_KEY || PUBLIC_KEY;
+
     setStatus({ type: "idle", msg: "" });
 
     // Front guards
-    if (!SERVICEID || !TEMPLATEID || !PUB_KEY) {
+    if (!EFFECTIVE_SERVICE || !EFFECTIVE_TEMPLATE || !EFFECTIVE_PUBLIC_KEY) {
       console.error("EmailJS config manquante:", {
-        SERVICEID,
-        TEMPLATEID,
-        PUB_KEY: !!PUB_KEY,
+        SERVICEID: EFFECTIVE_SERVICE,
+        TEMPLATEID: EFFECTIVE_TEMPLATE,
+        PUB_KEY: !!EFFECTIVE_PUBLIC_KEY,
       });
       setStatus({
         type: "error",
-        msg: "❌ Configuration EmailJS incomplète. Vérifie les variables (public key / service / template).",
+        msg: "❌ Configuration EmailJS incomplète (service / template / public key).",
       });
       return;
     }
@@ -106,7 +111,7 @@ export default function ContactPage() {
     };
 
     try {
-      const res = await emailjs.send(SERVICEID, TEMPLATEID, templateParams);
+      const res = await emailjs.send(EFFECTIVE_SERVICE, EFFECTIVE_TEMPLATE, templateParams);
       if (res?.status === 200) {
         setStatus({ type: "success", msg: "✅ Message envoyé avec succès !" });
         setFormData({ fullName: "", email: "", projectType: "", mobile: "", message: "" });
