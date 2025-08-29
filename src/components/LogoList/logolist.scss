@@ -1,13 +1,31 @@
 .cs-partner_logo_wrap {
-  display: flex;
-  justify-content: space-between;
-  margin: 0 -15px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  margin: 0;
 }
+
 .cs-partner_logo {
   padding: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
+.cs-partner_logo img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+@media screen and (max-width: 992px) {
+  .cs-partner_logo_wrap {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media screen and (max-width: 575px) {
   .cs-partner_logo_wrap {
-    margin: 0 -10px;
+    grid-template-columns: repeat(1, 1fr);
   }
 }
