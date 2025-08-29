@@ -54,11 +54,19 @@ export default function MarketingAgencyHome() {
 
       <Spacing lg="120" md="50" />
       <Div className="container">
-        <h1 className="cs-font_20 cs-m0 cs-line_height_4">
-            La flamme Limouxine, entreprise de vente d’appareil de chauffage à bois et à granulé à Limoux, possède la qualification RGE Qualibois.
-            Notre entreprise opère dans la vente et l’installation d’appareils de chauffage à bois et à granulés, mais nous offrons également des services d’entretien et de dépannage de chauffage bois et granulés à Limoux.
-        </h1>
+        <h2 className="cs-font_20 cs-m0 cs-line_height_4">
+          Entreprise <strong>RGE Qualibois</strong>, La Flamme Limouxine vend, installe, entretient et dépanne
+          les appareils de chauffage <strong>bois &amp; granulés</strong> (et solutions de climatisation).
+        </h2>
+        <p style={{ marginTop: 12 }} className="cs-m0 cs-line_height_4">
+          Nous intervenons dans un rayon d’environ <strong>50&nbsp;km autour de Limoux</strong> : Limoux, 
+          <strong> Carcassonne</strong>, <strong> Castelnaudary</strong>, <strong> Quillan</strong>, 
+          <strong> Mirepoix</strong>, <strong> Bram</strong>, <strong> Couiza</strong>, 
+          <strong> Espéraza</strong>, <strong> Alet-les-Bains</strong>, <strong> Chalabre</strong>, 
+          <strong> Lézignan-Corbières</strong>… Contactez‑nous pour vérifier votre commune.
+        </p>
       </Div>
+
 
       {/* Start MovingText Section */}
       <Spacing lg="125" md="70" />

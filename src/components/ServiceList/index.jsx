@@ -8,28 +8,28 @@ export default function ServiceList() {
     {
       title: 'Vente',
       subtitle:
-        'La flamme Limouxine assure la vente d\'appareil de chauffage bois (bûche et granulés) à Limoux.',
+        'La Flamme Limouxine propose la vente de solutions de chauffage bois (bûches et granulés) et de climatisation performante, adaptées à vos besoins.',
       imgUrl: '/images/service_7.jpg',
       href: '/services',
     },
     {
       title: 'Installation',
       subtitle:
-        'La flamme Limouxine est votre entreprise d\'appareil de chauffage bois (bûche et granulés) à Limoux.',
+        'La Flamme Limouxine assure l’installation professionnelle de poêles, chaudières bois et systèmes de climatisation, alliant confort et efficacité énergétique.',
       imgUrl: '/images/service_8.jpg',
       href: '/services',
     },
     {
       title: 'Entretien',
       subtitle:
-        'La flamme Limouxine est votre entreprise d’entretien d\'appareil de chauffage bois (bûche et  granulés) à Limoux.',
+        'Nous réalisons l’entretien complet de vos appareils de chauffage bois et de vos équipements de climatisation, pour garantir sécurité, performance et longévité.',
       imgUrl: '/images/service_9.jpg',
       href: '/services',
     },
     {
       title: 'Dépannage',
       subtitle:
-        'La flamme Limouxine est votre entreprise de dépannage d\'appareil de chauffage bois (bûche et  granulés) à Limoux.',
+        'Notre équipe intervient rapidement pour le dépannage de vos systèmes de chauffage bois et de climatisation, afin de rétablir votre confort sans délai.',
       imgUrl: '/images/service_10.jpeg',
       href: '/services',
     },
