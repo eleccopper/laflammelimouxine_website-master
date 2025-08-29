@@ -8,6 +8,10 @@ import SectionHeading from "../SectionHeading";
 import Spacing from "../Spacing";
 import ContactInfoWidget from "../Widget/ContactInfoWidget";
 
+const SERVICE_ID = "service_gcdtxho";
+const TEMPLATE_ID = "template_wb6euwh";
+const PUBLIC_KEY = "LB3XKA_fWsCk_Sscn";
+
 /**
  * Read env vars safely at runtime.
  * Priority: window.ENV -> process.env -> fallback
