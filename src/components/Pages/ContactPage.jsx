@@ -8,11 +8,27 @@ import SectionHeading from "../SectionHeading";
 import Spacing from "../Spacing";
 import ContactInfoWidget from "../Widget/ContactInfoWidget";
 
+// Normalize & trim EmailJS env vars to avoid accidental spaces from Heroku config
+const rawPUB = process.env.REACT_APP_EMAILJS_PUBLIC_KEY || "";
+const rawSID = process.env.REACT_APP_EMAILJS_SERVICE_ID || "";
+const rawTID = process.env.REACT_APP_EMAILJS_TEMPLATE_ID || "";
+const PUB_KEY = rawPUB.trim();
+const SERVICEID = rawSID.trim();
+const TEMPLATEID = rawTID.trim();
+
 export default function ContactPage() {
   pageTitle("Nous contacter");
 
   useEffect(() => {
-    emailjs.init(process.env.REACT_APP_EMAILJS_PUBLIC_KEY);
+    try {
+      if (PUB_KEY) {
+        emailjs.init(PUB_KEY);
+      } else {
+        console.warn("EmailJS: public key manquante (REACT_APP_EMAILJS_PUBLIC_KEY).");
+      }
+    } catch (e) {
+      console.error("EmailJS init error:", e);
+    }
   }, []);
 
   const [formData, setFormData] = useState({
@@ -32,14 +48,25 @@ export default function ContactPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setStatus("");
+    if (!SERVICEID || !TEMPLATEID || !PUB_KEY) {
+      console.error("EmailJS config manquante:", { SERVICEID, TEMPLATEID, PUB_KEY: !!PUB_KEY });
+      setStatus("❌ Configuration EmailJS manquante côté front (service, template ou clé publique).");
+      return;
+    }
     console.log("Formulaire soumis :", formData);
 
     emailjs
       .send(
-        process.env.REACT_APP_EMAILJS_SERVICE_ID,
-        process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
-        formData,
-        process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+        SERVICEID,
+        TEMPLATEID,
+        {
+          from_name: formData.fullName,
+          reply_to: formData.email,
+          project_type: formData.projectType,
+          phone: formData.mobile,
+          message: formData.message,
+        },
+        PUB_KEY
       )
       .then((response) => {
         console.log("Email envoyé :", response);
@@ -47,7 +74,7 @@ export default function ContactPage() {
         setFormData({ fullName: "", email: "", projectType: "", mobile: "", message: "" });
       })
       .catch((error) => {
-        console.error("Erreur lors de l'envoi :", error);
+        console.error("Erreur lors de l'envoi :", error?.text || error?.message || error);
         setStatus("❌ Erreur lors de l'envoi du message. Veuillez réessayer.");
       });
   };
