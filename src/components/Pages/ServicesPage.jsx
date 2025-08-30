@@ -112,25 +112,24 @@ export default function ServicesPage() {
             <Div className="container">
                 <Spacing lg="150" md="80" />
                 <Div className="row">
-                    {displayedPosts.map((item, index) => (
-                        <Div key={index} className={`col-lg-6 mb-4 ${index % 2 === 0 ? 'order-lg-1' : ''}`}>
-                            {(() => {
-                              const title = item?.attributes?.title || item?.title || '';
-                              const slug = item?.attributes?.slug || makeSlug(title);
-                              return (
-                                <PostStyle2
-                                  title={title}
-                                  thumb={item?.attributes?.image || item?.image}
-                                  subtitle={item?.attributes?.subtitle || item?.subtitle}
-                                  date={item?.attributes?.date || item?.date}
-                                  category={getItemCategoryName(item)}
-                                  categoryHref={`/services/${makeSlug(getItemCategoryName(item))}`}
-                                  href={`/services/${makeSlug(getItemCategoryName(item))}/${slug}`}
-                                />
-                              );
-                            })()}
-                        </Div>
-                    ))}
+                  {displayedPosts.map((item, index) => {
+                    const stableKey = item?.id || item?.documentId || index;
+                    const title = item?.attributes?.title || item?.title || '';
+                    const slug = item?.attributes?.slug || makeSlug(title);
+                    return (
+                      <Div key={stableKey} className="col-lg-6 mb-4">
+                        <PostStyle2
+                          title={title}
+                          thumb={item?.attributes?.image || item?.image}
+                          subtitle={item?.attributes?.subtitle || item?.subtitle}
+                          date={item?.attributes?.date || item?.date}
+                          category={getItemCategoryName(item)}
+                          categoryHref={`/services/${makeSlug(getItemCategoryName(item))}`}
+                          href={`/services/${makeSlug(getItemCategoryName(item))}/${slug}`}
+                        />
+                      </Div>
+                    );
+                  })}
                 </Div>
                 <Spacing lg="60" md="40" />
                 <Pagination
