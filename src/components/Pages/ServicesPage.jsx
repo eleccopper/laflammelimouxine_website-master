@@ -36,27 +36,32 @@ export default function ServicesPage() {
 
           if (data && Array.isArray(data.data)) {
             // Tri custom par ordre métier (Vente → Installation → Entretien → SAV)
-            const ORDER = ['vente', 'installation', 'entretien', 'sav'];
+            // mapping explicite pour tolérer majuscules/accents/variantes
+            const ORDER = {
+              vente: 0,
+              installation: 1,
+              entretien: 2,
+              sav: 3,
+            };
 
-            const getTitle = (it) =>
-              String(it?.attributes?.title || it?.title || '')
+            const normalizeKey = (title) =>
+              (String(title || ''))
                 .toLowerCase()
                 .normalize('NFD')
                 .replace(/[\u0300-\u036f]/g, ''); // supprime accents
 
-            const orderIndex = (name) => {
-              const idx = ORDER.indexOf(name);
-              return idx === -1 ? Number.POSITIVE_INFINITY : idx;
-            };
-
             const sorted = [...data.data].sort((a, b) => {
-              const aName = getTitle(a);
-              const bName = getTitle(b);
-              const aRank = orderIndex(aName);
-              const bRank = orderIndex(bName);
+              const aTitle = a?.attributes?.title || a?.title || '';
+              const bTitle = b?.attributes?.title || b?.title || '';
+
+              const aKey = normalizeKey(aTitle);
+              const bKey = normalizeKey(bTitle);
+
+              const aRank = ORDER[aKey] ?? Number.POSITIVE_INFINITY;
+              const bRank = ORDER[bKey] ?? Number.POSITIVE_INFINITY;
 
               if (aRank === bRank) {
-                // fallback stable pour éléments hors liste
+                // fallback stable: ID croissant pour les éléments hors liste
                 return (a?.id || 0) - (b?.id || 0);
               }
               return aRank - bRank;
