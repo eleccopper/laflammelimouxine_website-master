@@ -35,21 +35,30 @@ export default function ServicesPage() {
           const data = await response.json();
 
           if (data && Array.isArray(data.data)) {
-            // Tri custom par ordre métier (titre) : Vente → Installation → Entretien → SAV
+            // Tri custom par ordre métier (Vente → Installation → Entretien → SAV)
             const ORDER = ['vente', 'installation', 'entretien', 'sav'];
-            const normalizeTitle = (it) =>
+
+            const getTitle = (it) =>
               String(it?.attributes?.title || it?.title || '')
                 .toLowerCase()
                 .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, ''); // sans accents
+                .replace(/[\u0300-\u036f]/g, ''); // supprime accents
+
+            const orderIndex = (name) => {
+              const idx = ORDER.indexOf(name);
+              return idx === -1 ? Number.POSITIVE_INFINITY : idx;
+            };
 
             const sorted = [...data.data].sort((a, b) => {
-              const ai = ORDER.indexOf(normalizeTitle(a));
-              const bi = ORDER.indexOf(normalizeTitle(b));
-              const aRank = ai === -1 ? Number.POSITIVE_INFINITY : ai;
-              const bRank = bi === -1 ? Number.POSITIVE_INFINITY : bi;
-              // si rangs égaux (ou inconnus), fallback sur id croissant pour stabilité
-              if (aRank === bRank) return (a?.id || 0) - (b?.id || 0);
+              const aName = getTitle(a);
+              const bName = getTitle(b);
+              const aRank = orderIndex(aName);
+              const bRank = orderIndex(bName);
+
+              if (aRank === bRank) {
+                // fallback stable pour éléments hors liste
+                return (a?.id || 0) - (b?.id || 0);
+              }
               return aRank - bRank;
             });
 
