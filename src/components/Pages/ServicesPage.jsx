@@ -22,9 +22,8 @@ export default function ServicesPage() {
         try {
           const params = new URLSearchParams();
           params.set('populate', 'image');
-          // tri stable: d'abord date de création, puis id pour départager
-          params.append('sort[0]', 'createdAt:asc');
-          params.append('sort[1]', 'id:asc');
+          // Tri par ID asc (Option 1)
+          params.append('sort[0]', 'id:asc');
           // pagination Strapi (page/pageSize) pour éviter les incohérences
           params.set('pagination[page]', String(currentPage));
           params.set('pagination[pageSize]', String(itemsPerPage));
@@ -38,13 +37,8 @@ export default function ServicesPage() {
           const data = await response.json();
 
           if (data && Array.isArray(data.data)) {
-            // filet de sécurité: re-tri côté client de manière stable
-            const sorted = [...data.data].sort((a, b) => {
-              const ad = new Date(a?.attributes?.createdAt || a?.createdAt || 0).getTime();
-              const bd = new Date(b?.attributes?.createdAt || b?.createdAt || 0).getTime();
-              if (ad !== bd) return ad - bd;
-              return (a?.id || 0) - (b?.id || 0);
-            });
+            // filet de sécurité: tri uniquement par ID (Option 1)
+            const sorted = [...data.data].sort((a, b) => (a?.id || 0) - (b?.id || 0));
             setPostData(sorted);
             const totalPosts = data?.meta?.pagination?.total || sorted.length;
             setTotalPages(Math.ceil(totalPosts / itemsPerPage));
