@@ -22,8 +22,6 @@ export default function ServicesPage() {
         try {
           const params = new URLSearchParams();
           params.set('populate', 'image');
-          // Tri par ID asc (Option 1)
-          params.append('sort[0]', 'id:asc');
           // pagination Strapi (page/pageSize) pour éviter les incohérences
           params.set('pagination[page]', String(currentPage));
           params.set('pagination[pageSize]', String(itemsPerPage));
@@ -37,8 +35,24 @@ export default function ServicesPage() {
           const data = await response.json();
 
           if (data && Array.isArray(data.data)) {
-            // filet de sécurité: tri uniquement par ID (Option 1)
-            const sorted = [...data.data].sort((a, b) => (a?.id || 0) - (b?.id || 0));
+            // Tri custom par ordre métier (titre) : Vente → Installation → Entretien → SAV
+            const ORDER = ['vente', 'installation', 'entretien', 'sav'];
+            const normalizeTitle = (it) =>
+              String(it?.attributes?.title || it?.title || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, ''); // sans accents
+
+            const sorted = [...data.data].sort((a, b) => {
+              const ai = ORDER.indexOf(normalizeTitle(a));
+              const bi = ORDER.indexOf(normalizeTitle(b));
+              const aRank = ai === -1 ? Number.POSITIVE_INFINITY : ai;
+              const bRank = bi === -1 ? Number.POSITIVE_INFINITY : bi;
+              // si rangs égaux (ou inconnus), fallback sur id croissant pour stabilité
+              if (aRank === bRank) return (a?.id || 0) - (b?.id || 0);
+              return aRank - bRank;
+            });
+
             setPostData(sorted);
             const totalPosts = data?.meta?.pagination?.total || sorted.length;
             setTotalPages(Math.ceil(totalPosts / itemsPerPage));
