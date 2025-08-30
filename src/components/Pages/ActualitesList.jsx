@@ -15,6 +15,16 @@ const ActualitesList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Scroll en haut à l'ouverture de la page (comme sur Produits)
+  useEffect(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    } catch (_) {
+      // Fallback très old browsers
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   // --- Helpers to normalize Strapi v4/v5 responses & media ---
   const pickMediaUrl = (media) => {
     if (!media) return null;

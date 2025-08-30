@@ -43,6 +43,11 @@ const TEMPLATEID= readEnv("REACT_APP_EMAILJS_TEMPLATE_ID", TEMPLATE_ID);
 export default function ContactPage() {
   pageTitle("Nous contacter");
 
+  // Always scroll to top when this page mounts (fix SPA scroll retention)
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+  }, []);
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",

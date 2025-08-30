@@ -100,10 +100,6 @@ export default function LogoList() {
       src: '/images/partner_24.png',
       alt:'Partner'
     },
-    {
-      src: '/images/partner_25.png',
-      alt:'Partner'
-    }
 
   ]
   return (

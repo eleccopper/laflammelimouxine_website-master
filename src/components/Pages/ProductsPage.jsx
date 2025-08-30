@@ -27,6 +27,16 @@ export default function ProductsPage() {
     });
     const strapiUrl = config.strapiUrl;
 
+    // Always start at top when navigating to Products page
+    useEffect(() => {
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      } catch {
+        // fallback for older browsers
+        window.scrollTo(0, 0);
+      }
+    }, []);
+
     useEffect(() => {
         fetch(`${strapiUrl}/products?populate=*`)
             .then(response => response.json())
