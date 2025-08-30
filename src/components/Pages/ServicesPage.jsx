@@ -18,24 +18,48 @@ export default function ServicesPage() {
     const { category } = useParams();
 
     useEffect(() => {
-        const fetchBlogPosts = async () => {
-            try {
-                const response = await fetch(`${strapiUrl}/blog-posts?populate=image&pagination[start]=${(currentPage - 1) * itemsPerPage}&pagination[limit]=${itemsPerPage}&sort[0]=createdAt:asc`);
-                const data = await response.json();
+      const fetchBlogPosts = async () => {
+        try {
+          const params = new URLSearchParams();
+          params.set('populate', 'image');
+          // tri stable: d'abord date de création, puis id pour départager
+          params.append('sort[0]', 'createdAt:asc');
+          params.append('sort[1]', 'id:asc');
+          // pagination Strapi (page/pageSize) pour éviter les incohérences
+          params.set('pagination[page]', String(currentPage));
+          params.set('pagination[pageSize]', String(itemsPerPage));
 
-                if (data && data.data) {
-                    setPostData(data.data);
-                    const totalPosts = data.meta.pagination.total;
-                    setTotalPages(Math.ceil(totalPosts / itemsPerPage));
-                }
-            } catch (error) {
-                console.error('Error fetching blog posts:', error);
-            }
-        };
+          // Filtre serveur par catégorie si l'URL comporte /services/:category
+          if (category) {
+            params.append('filters[category][$containsi]', decodeURIComponent(category));
+          }
 
-        fetchBlogPosts();
-        window.scrollTo(0, 0);
-    }, [strapiUrl, currentPage]);
+          const response = await fetch(`${strapiUrl}/blog-posts?${params.toString()}`);
+          const data = await response.json();
+
+          if (data && Array.isArray(data.data)) {
+            // filet de sécurité: re-tri côté client de manière stable
+            const sorted = [...data.data].sort((a, b) => {
+              const ad = new Date(a?.attributes?.createdAt || a?.createdAt || 0).getTime();
+              const bd = new Date(b?.attributes?.createdAt || b?.createdAt || 0).getTime();
+              if (ad !== bd) return ad - bd;
+              return (a?.id || 0) - (b?.id || 0);
+            });
+            setPostData(sorted);
+            const totalPosts = data?.meta?.pagination?.total || sorted.length;
+            setTotalPages(Math.ceil(totalPosts / itemsPerPage));
+          } else {
+            setPostData([]);
+            setTotalPages(1);
+          }
+        } catch (error) {
+          console.error('Error fetching blog posts:', error);
+        }
+      };
+
+      fetchBlogPosts();
+      window.scrollTo(0, 0);
+    }, [strapiUrl, currentPage, category]);
 
     const getItemCategoryName = (item) => (
       item?.attributes?.category ||
@@ -58,7 +82,7 @@ export default function ServicesPage() {
       ? postData.filter((it) => makeSlug(getItemCategoryName(it)) === activeCategorySlug)
       : postData;
 
-    const displayedPosts = filteredPosts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    const displayedPosts = filteredPosts; // Strapi gère déjà pagination + tri; pas de re-slice côté client
 
     return (
         <>
