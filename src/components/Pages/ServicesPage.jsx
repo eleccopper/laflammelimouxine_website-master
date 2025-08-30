@@ -20,7 +20,7 @@ export default function ServicesPage() {
     useEffect(() => {
         const fetchBlogPosts = async () => {
             try {
-                const response = await fetch(`${strapiUrl}/blog-posts?populate=image&pagination[start]=${(currentPage - 1) * itemsPerPage}&pagination[limit]=${itemsPerPage}`);
+                const response = await fetch(`${strapiUrl}/blog-posts?populate=image&pagination[start]=${(currentPage - 1) * itemsPerPage}&pagination[limit]=${itemsPerPage}&sort[0]=createdAt:asc`);
                 const data = await response.json();
 
                 if (data && data.data) {
