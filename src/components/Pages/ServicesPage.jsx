@@ -132,11 +132,13 @@ export default function ServicesPage() {
                   })}
                 </Div>
                 <Spacing lg="60" md="40" />
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={(pageNumber) => setCurrentPage(pageNumber)}
-                />
+                {totalPages > 1 && (
+                  <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={(pageNumber) => setCurrentPage(pageNumber)}
+                  />
+                )}
                 <Spacing lg="150" md="80" />
             </Div>
         </>
