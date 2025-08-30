@@ -25,7 +25,7 @@ export default function ServicesPage() {
           // pagination Strapi (page/pageSize) pour éviter les incohérences
           params.set('pagination[page]', String(currentPage));
           params.set('pagination[pageSize]', String(itemsPerPage));
-
+          params.set('sort', 'id:asc'); // ou 'id:asc' si tu préfères l'ID
           // Filtre serveur par catégorie si l'URL comporte /services/:category
           if (category) {
             params.append('filters[category][$containsi]', decodeURIComponent(category));
