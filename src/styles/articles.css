@@ -32,9 +32,12 @@
 .voir-plus-container {
   text-align: center;
   margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .voir-plus-btn {
-  background-color: #0a66c2;
+  background-color: #c0392b;
   color: #fff;
   border: none;
   border-radius: 6px;
