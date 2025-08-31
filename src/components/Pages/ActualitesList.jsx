@@ -6,9 +6,11 @@ import '../../styles/articles.css';
 
 /**
  * Page: Liste des Actualités
- * - Grille responsive (cartes)
- * - Skeletons pendant le chargement
- * - Gestion des erreurs & état vide
+ * Objectif: charger et afficher TOUTES les actualités (pas seulement 12).
+ * - Récupération par lots jusqu'à épuisement (page++ tant qu'il y a des résultats)
+ * - Grille responsive
+ * - Skeletons, gestion erreurs
+ * - Fallback visuel quand pas d'image
  */
 const ActualitesList = () => {
   const [items, setItems] = useState([]);
@@ -20,7 +22,6 @@ const ActualitesList = () => {
     try {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     } catch (_) {
-      // Fallback très old browsers
       window.scrollTo(0, 0);
     }
   }, []);
@@ -39,24 +40,23 @@ const ActualitesList = () => {
       node?.url ||
       null;
     if (!candidate) return null;
-    // If it's a front asset (/images/...), keep as-is; otherwise absolutize with backend base
+    // Si c'est un asset front (/images/...), on garde tel quel; sinon on absolutise avec le backend
     return typeof candidate === 'string' && candidate.startsWith('/images/')
       ? candidate
       : absoluteMediaUrl(candidate);
   };
 
   const normalizeArticle = (raw) => {
-    // Accept either flattened item or Strapi { id, attributes } shape
+    // Accepte soit un item aplati, soit { id, attributes } de Strapi
     const a = raw?.attributes ? { id: raw.id, ...raw.attributes } : raw || {};
     return {
       id: a.documentId || a.id,
       title: a.title || '',
-      slug: a.slug || a.documentId || a.id?.toString?.() || '',
+      slug: a.slug || a.documentId || (a.id && String(a.id)) || '',
       excerpt: a.excerpt || '',
       content: a.content || '',
       publishedAt: a.publishedAt || a.createdAt || null,
       coverUrl: pickMediaUrl(a.cover) || pickMediaUrl(a.image) || '/images/news-placeholder.jpg',
-      // Keep original for alt text
       _alt: a.cover?.alternativeText || a.image?.alternativeText || a.title || 'Actualité',
     };
   };
@@ -74,17 +74,32 @@ const ActualitesList = () => {
     []
   );
 
+  // Charge TOUTES les actualités par lots de PAGE_SIZE
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
       try {
         setLoading(true);
-        const { items: data } = await fetchActualites({
-          page: 1,
-          pageSize: 12,
-        });
-        if (!cancelled) setItems(Array.isArray(data) ? data : []);
+        setError(null);
+
+        const PAGE_SIZE = 50; // lot assez grand pour limiter les requêtes
+        let page = 1;
+        const all = [];
+
+        // on boucle jusqu'à ce qu'un lot revienne vide (ou plus petit que PAGE_SIZE)
+        // fetchActualites doit renvoyer { items: [...] } ; si ce n'est pas le cas,
+        // on sécurise avec une valeur par défaut []
+        while (true) {
+          const res = await fetchActualites({ page, pageSize: PAGE_SIZE });
+          const batch = Array.isArray(res?.items) ? res.items : [];
+          if (!batch.length) break;
+          all.push(...batch);
+          if (batch.length < PAGE_SIZE) break;
+          page += 1;
+        }
+
+        if (!cancelled) setItems(all);
       } catch (e) {
         console.error('Actualités – fetch error:', e);
         if (!cancelled) setError("Impossible de récupérer les actualités pour le moment.");
@@ -139,7 +154,7 @@ const ActualitesList = () => {
       <main className="container">
         {loading ? (
           <div className="articles-list">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 12 }).map((_, i) => (
               <SkeletonCard key={i} />
             ))}
           </div>
@@ -154,43 +169,48 @@ const ActualitesList = () => {
             <Link className="btn" to="/">Retour à l’accueil</Link>
           </div>
         ) : (
-          <div className="articles-list">
-            {items.map((raw) => {
-              const item = normalizeArticle(raw);
-              return (
-                <article className="article-card" key={item.id}>
-                  <Link to={`/actualites/${item.slug}`} className="actu-cover-link" aria-label={item.title}>
-                    <div className="actu-cover">
-                      {item.coverUrl ? (
-                        <img
-                          src={item.coverUrl}
-                          alt={item._alt}
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="actu-cover placeholder" aria-hidden="true" />
-                      )}
-                    </div>
-                  </Link>
+          <>
+            <p className="actu-count" style={{ margin: '16px 0 24px', opacity: 0.7 }}>
+              {items.length} actualit{items.length > 1 ? 'és' : 'é'} trouv{items.length > 1 ? 'ées' : 'ée'}.
+            </p>
+            <div className="articles-list">
+              {items.map((raw) => {
+                const item = normalizeArticle(raw);
+                return (
+                  <article className="article-card" key={item.id}>
+                    <Link to={`/actualites/${item.slug}`} className="actu-cover-link" aria-label={item.title}>
+                      <div className="actu-cover">
+                        {item.coverUrl ? (
+                          <img
+                            src={item.coverUrl}
+                            alt={item._alt}
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="actu-cover placeholder" aria-hidden="true" />
+                        )}
+                      </div>
+                    </Link>
 
-                  <div className="article-card-content">
-                    <time className="actu-date" dateTime={item.publishedAt || ''}>
-                      {formatDate(item.publishedAt)}
-                    </time>
-                    <h2 className="actu-title">
-                      <Link to={`/actualites/${item.slug}`}>{item.title}</Link>
-                    </h2>
-                    {item.excerpt && <p className="actu-excerpt">{item.excerpt}</p>}
-                    <div className="actu-actions">
-                      <Link className="btn btn-link" to={`/actualites/${item.slug}`}>
-                        Lire plus
-                      </Link>
+                    <div className="article-card-content">
+                      <time className="actu-date" dateTime={item.publishedAt || ''}>
+                        {formatDate(item.publishedAt)}
+                      </time>
+                      <h2 className="actu-title">
+                        <Link to={`/actualites/${item.slug}`}>{item.title}</Link>
+                      </h2>
+                      {item.excerpt && <p className="actu-excerpt">{item.excerpt}</p>}
+                      <div className="actu-actions">
+                        <Link className="btn btn-link" to={`/actualites/${item.slug}`}>
+                          Lire plus
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                  </article>
+                );
+              })}
+            </div>
+          </>
         )}
       </main>
     </div>
