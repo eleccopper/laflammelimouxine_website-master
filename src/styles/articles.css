@@ -29,6 +29,24 @@
   padding: 2rem;
 }
 
+.voir-plus-container {
+  text-align: center;
+  margin: 20px 0;
+}
+.voir-plus-btn {
+  background-color: #0a66c2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.voir-plus-btn:hover {
+  background-color: #084a91;
+}
+
 .article-card {
   background: #fff;
   border-radius: 10px;

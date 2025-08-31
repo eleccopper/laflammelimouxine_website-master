@@ -17,12 +17,7 @@ const ActualitesList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Affichage progressif (front-only): 10 items au départ puis "Voir plus"
-  const [visibleCount, setVisibleCount] = useState(10);
-  useEffect(() => {
-    // Réinitialise l'affichage quand une nouvelle liste arrive
-    setVisibleCount(10);
-  }, [items]);
+  const [visibleCount, setVisibleCount] = useState(12);
 
   // Scroll en haut à l'ouverture de la page (comme sur Produits)
   useEffect(() => {
@@ -131,6 +126,10 @@ const ActualitesList = () => {
     </article>
   );
 
+  const handleVoirPlus = () => {
+    setVisibleCount((count) => count + 12);
+  };
+
   return (
     <div className="page--article actualites-wrapper">
       {/* En‑tête */}
@@ -178,7 +177,7 @@ const ActualitesList = () => {
         ) : (
           <>
             <p className="actu-count" style={{ margin: '16px 0 24px', opacity: 0.7 }}>
-              Affichage de {Math.min(visibleCount, items.length)} / {items.length} actualit{items.length > 1 ? 'és' : 'é'}.
+              {items.length} actualit{items.length > 1 ? 'és' : 'é'} trouv{items.length > 1 ? 'ées' : 'ée'}.
             </p>
             <div className="articles-list">
               {items.slice(0, visibleCount).map((raw) => {
@@ -216,20 +215,14 @@ const ActualitesList = () => {
                   </article>
                 );
               })}
+              {visibleCount < items.length && (
+                <div className="voir-plus-container">
+                  <button className="voir-plus-btn" onClick={handleVoirPlus}>
+                    Voir plus
+                  </button>
+                </div>
+              )}
             </div>
-
-            {visibleCount < items.length && (
-              <div className="text-center" style={{ marginTop: '24px' }}>
-                <button
-                  type="button"
-                  className="btn"
-                  onClick={() => setVisibleCount((n) => n + 10)}
-                  aria-label="Charger plus d’actualités"
-                >
-                  Voir plus
-                </button>
-              </div>
-            )}
           </>
         )}
       </main>
