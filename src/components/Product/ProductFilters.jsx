@@ -145,22 +145,24 @@ export default function ProductFilters({
           </div>
         </fieldset>
 
-        {/* Brand (multi) */}
-        <fieldset className="lfl-filter lfl-filter--brand">
-          <legend className="lfl-filter__label">Marque</legend>
-          <div className="lfl-filter__group">
+        {/* Brand (single select dropdown) */}
+        <div className="lfl-filter lfl-filter--brand">
+          <label htmlFor="filter-brand" className="lfl-filter__label">Marque</label>
+          <select
+            id="filter-brand"
+            className="lfl-filter__select"
+            value={(draft.brand && draft.brand[0]) ? draft.brand[0] : ""}
+            onChange={(e) => {
+              const val = e.target.value;
+              set({ brand: val ? [val] : [] });
+            }}
+          >
+            <option value="">Toutes les marques</option>
             {brands.map((b) => (
-              <label key={b} className="lfl-check">
-                <input
-                  type="checkbox"
-                  checked={draft.brand.includes(b)}
-                  onChange={() => toggleIn("brand", b)}
-                />
-                <span className="lfl-check__text">{b}</span>
-              </label>
+              <option key={b} value={b}>{b}</option>
             ))}
-          </div>
-        </fieldset>
+          </select>
+        </div>
 
         {/* Power range */}
         <fieldset className="lfl-filter lfl-filter--power">
@@ -225,6 +227,7 @@ export default function ProductFilters({
         }
         .lfl-filter__label { display:block; font-weight:600; margin: 0 0 .35rem; font-size:.95rem; }
         .lfl-filter__select { width:100%; padding:.5rem .6rem; border:1px solid #ddd; border-radius:6px; background:#fff; }
+        .lfl-filter--brand .lfl-filter__select { width:100%; }
         .lfl-filter__group { display:flex; flex-wrap:wrap; gap:.5rem .75rem; }
         .lfl-check { display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .4rem; border:1px solid #e7e7e7; border-radius:6px; background:#fff; cursor:pointer; user-select:none; }
         .lfl-check input { accent-color:#111; }
@@ -259,6 +262,16 @@ function labelizeType(t) {
     case "hydro": return "Hydro";
     default: return t;
   }
+}
+
+function norm(str) {
+  if (str == null) return "";
+  return String(str)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // strip accents
+    .replace(/\s+/g, ' ')             // collapse spaces
+    .trim()
+    .toLowerCase();
 }
 
 /**
@@ -319,12 +332,12 @@ export function productMatchesFilters(product, filters) {
     if (!ok) return false;
   }
 
-  // Brand (at least one). Case-insensitive.
+  // Brand (single value from dropdown). Normalized (case, accents, spaces).
   if (f.brand.length) {
     const b = getBrand(product);
-    const prodBrand = b ? String(b).toLowerCase() : "";
-    const ok = f.brand.some((val) => prodBrand === String(val).toLowerCase());
-    if (!ok) return false;
+    const prodBrand = norm(b);
+    const wanted = norm(f.brand[0]);
+    if (wanted && prodBrand !== wanted) return false;
   }
 
   // Power min/max
