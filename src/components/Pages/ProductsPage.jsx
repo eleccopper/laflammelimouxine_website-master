@@ -100,7 +100,10 @@ export default function ProductsPage() {
       if (hasMin && (!Number.isFinite(prodKw) || prodKw < filters.powerMin)) return false;
       if (hasMax && (!Number.isFinite(prodKw) || prodKw > filters.powerMax)) return false;
 
-      return allNames.includes(active);
+      // Catégorie
+      if (active !== 'all' && !allNames.includes(active)) return false;
+
+      return true;
     });
 
     const getProductId = (product) => {
