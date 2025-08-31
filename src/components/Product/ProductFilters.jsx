@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 
 /**
  * ProductFilters
@@ -22,12 +22,45 @@ import React, { useMemo } from "react";
 
 const DEFAULT_CATEGORIES = [
   { label: "Tous", value: "" },
-  { label: "Poêles à granulés", value: "poele-a-granules" },
-  { label: "Poêles à bois", value: "poele-a-bois" },
+  { label: "Poêles à granulés", value: "5" },
+  { label: "Poêles à bois", value: "11" },
+  { label: "Cuisinière à bois", value: "36" },
+  { label: "Insert à bois", value: "38" },
+  { label: "Insert à granulés", value: "41" },
+  { label: "Cheminée à bois", value: "43" },
+  { label: "Chaudière à bois", value: "47" },
+  { label: "Chaudière à granulés", value: "49" },
+  { label: "Pompe à chaleur", value: "51" },
+  { label: "Cimatisation", value: "53" }
 ];
 
 const DEFAULT_TYPES = ["air", "canalisable", "etanche", "hydro"];
-const DEFAULT_BRANDS = ["MCZ", "Edilkamin", "Rika", "Autre"];
+const DEFAULT_BRANDS = [
+  "MCZ",
+  "EDILKAMIN",
+  "Herz",
+  "HARGASNER",
+  "STOVAX GAZO",
+  "ROCAL",
+  "LACUNZA",
+  "SCAN",
+  "ILD",
+  "GODIN",
+  "BECAFIRE",
+  "COLOR AND FIRE",
+  "MORSO",
+  "JACOBUS",
+  "TURBO FONTE",
+  "EXTRA FLAMME  NORDICA",
+  "ARTENSE",
+  "EMBER",
+  "NEOCUBE",
+  "DEMANINCOR",
+  "WECOS",
+  "JIDE",
+  "jeremias",
+  "ice srtream"
+];
 
 export default function ProductFilters({
   value,
@@ -39,10 +72,18 @@ export default function ProductFilters({
 }) {
   const v = useMemo(() => normalizeValue(value), [value]);
 
-  const set = (patch) => onChange({ ...v, ...patch });
+  // Local "draft" state: user edits don't apply until "Appliquer"
+  const [draft, setDraft] = useState(v);
+  useEffect(() => {
+    // Keep local draft in sync if parent value changes externally
+    setDraft(v);
+  }, [v]);
+
+  // Update only the local draft
+  const set = (patch) => setDraft((prev) => ({ ...prev, ...patch }));
 
   const toggleIn = (key, item) => {
-    const arr = new Set(v[key] || []);
+    const arr = new Set((draft && draft[key]) || []);
     if (arr.has(item)) arr.delete(item);
     else arr.add(item);
     set({ [key]: Array.from(arr) });
@@ -55,14 +96,19 @@ export default function ProductFilters({
     set({ [key]: num });
   };
 
-  const reset = () =>
-    onChange({
+  const reset = () => {
+    const empty = {
       category: null,
       type: [],
       brand: [],
       powerMin: null,
       powerMax: null,
-    });
+    };
+    setDraft(empty);
+    onChange(empty);
+  };
+
+  const applyFilters = () => onChange(normalizeValue(draft));
 
   return (
     <form className="lfl-filters" onSubmit={(e) => e.preventDefault()} aria-label="Filtres produits">
@@ -73,7 +119,7 @@ export default function ProductFilters({
           <select
             id="filter-category"
             className="lfl-filter__select"
-            value={v.category ?? ""}
+            value={draft.category ?? ""}
             onChange={(e) => set({ category: e.target.value || null })}
           >
             {categories.map((c) => (
@@ -90,7 +136,7 @@ export default function ProductFilters({
               <label key={t} className="lfl-check">
                 <input
                   type="checkbox"
-                  checked={v.type.includes(t)}
+                  checked={draft.type.includes(t)}
                   onChange={() => toggleIn("type", t)}
                 />
                 <span className="lfl-check__text">{labelizeType(t)}</span>
@@ -107,7 +153,7 @@ export default function ProductFilters({
               <label key={b} className="lfl-check">
                 <input
                   type="checkbox"
-                  checked={v.brand.includes(b)}
+                  checked={draft.brand.includes(b)}
                   onChange={() => toggleIn("brand", b)}
                 />
                 <span className="lfl-check__text">{b}</span>
@@ -128,7 +174,7 @@ export default function ProductFilters({
                 min={powerRange.min}
                 max={powerRange.max}
                 step={powerRange.step ?? 0.5}
-                value={v.powerMin ?? ""}
+                value={draft.powerMin ?? ""}
                 onChange={(e) => handleNumber("powerMin", e.target.value)}
                 placeholder={String(powerRange.min)}
                 aria-label="Puissance minimale en kilowatts"
@@ -143,7 +189,7 @@ export default function ProductFilters({
                 min={powerRange.min}
                 max={powerRange.max}
                 step={powerRange.step ?? 0.5}
-                value={v.powerMax ?? ""}
+                value={draft.powerMax ?? ""}
                 onChange={(e) => handleNumber("powerMax", e.target.value)}
                 placeholder={String(powerRange.max)}
                 aria-label="Puissance maximale en kilowatts"
@@ -152,10 +198,13 @@ export default function ProductFilters({
           </div>
         </fieldset>
 
-        {/* Reset */}
+        {/* Reset and Apply */}
         <div className="lfl-filter lfl-filter--actions">
           <button type="button" className="lfl-btn lfl-btn--reset" onClick={reset} aria-label="Réinitialiser les filtres">
             Réinitialiser
+          </button>
+          <button type="button" className="lfl-btn lfl-btn--apply" onClick={applyFilters} aria-label="Appliquer les filtres">
+            Appliquer les filtres
           </button>
         </div>
       </div>
@@ -170,6 +219,7 @@ export default function ProductFilters({
         .lfl-filter--brand { grid-column: span 3; }
         .lfl-filter--power { grid-column: span 2; }
         .lfl-filter--actions { grid-column: span 1; display: flex; align-items: end; }
+        .lfl-filter--actions { gap:.5rem; flex-wrap:wrap; }
         @media (max-width: 980px) {
           .lfl-filter--category, .lfl-filter--type, .lfl-filter--brand, .lfl-filter--power, .lfl-filter--actions { grid-column: span 12; }
         }
@@ -184,6 +234,8 @@ export default function ProductFilters({
         .lfl-btn { appearance:none; border:none; cursor:pointer; font-weight:600; }
         .lfl-btn--reset { padding:.55rem .8rem; border-radius:6px; background:#f1f1f1; border:1px solid #e1e1e1; }
         .lfl-btn--reset:hover { background:#e9e9e9; }
+        .lfl-btn--apply { padding:.55rem .8rem; border-radius:6px; background:#111; color:#fff; }
+        .lfl-btn--apply:hover { background:#333; }
       `}</style>
     </form>
   );
@@ -208,3 +260,82 @@ function labelizeType(t) {
     default: return t;
   }
 }
+
+/**
+ * Normalized access helpers to read product fields despite API shape differences
+ */
+function getCategoryId(product) {
+  // Support several shapes: product.category.id, product.categorie.id, product.attributes.category.data.id
+  const p = product || {};
+  const direct = p.category?.id || p.categorie?.id || p.categoryId || p.categorieId;
+  const attrRel = p.attributes?.category?.data?.id || p.attributes?.categorie?.data?.id;
+  return direct ?? attrRel ?? null;
+}
+
+function getTypeArray(product) {
+  const t = product?.type || product?.attributes?.type || product?.attributes?.Type;
+  if (!t) return [];
+  return Array.isArray(t) ? t : [String(t)];
+}
+
+function getBrand(product) {
+  return (
+    product?.brand ||
+    product?.marque ||
+    product?.attributes?.brand ||
+    product?.attributes?.marque ||
+    null
+  );
+}
+
+function getPower(product) {
+  const v =
+    product?.powerKw ??
+    product?.power ??
+    product?.puissance ??
+    product?.attributes?.powerKw ??
+    product?.attributes?.power ??
+    product?.attributes?.puissance ??
+    null;
+  return typeof v === "number" ? v : v != null ? Number(v) : null;
+}
+
+/**
+ * Public helper: test if a product matches the current filters
+ * Usage: products.filter(p => productMatchesFilters(p, filters))
+ */
+export function productMatchesFilters(product, filters) {
+  const f = normalizeValue(filters);
+
+  // Category (by id string/number)
+  if (f.category && String(getCategoryId(product)) !== String(f.category)) {
+    return false;
+  }
+
+  // Type (at least one selected must match). Filter values are lowercased.
+  if (f.type.length) {
+    const prodTypes = getTypeArray(product).map((x) => String(x).toLowerCase());
+    const ok = f.type.some((val) => prodTypes.includes(String(val).toLowerCase()));
+    if (!ok) return false;
+  }
+
+  // Brand (at least one). Case-insensitive.
+  if (f.brand.length) {
+    const b = getBrand(product);
+    const prodBrand = b ? String(b).toLowerCase() : "";
+    const ok = f.brand.some((val) => prodBrand === String(val).toLowerCase());
+    if (!ok) return false;
+  }
+
+  // Power min/max
+  const pwr = getPower(product);
+  if (f.powerMin != null && pwr != null && pwr < f.powerMin) return false;
+  if (f.powerMax != null && pwr != null && pwr > f.powerMax) return false;
+
+  return true;
+}
+
+// Also export the lists so the parent can import them if needed
+export const FILTER_CATEGORIES = DEFAULT_CATEGORIES;
+export const FILTER_BRANDS = DEFAULT_BRANDS;
+export const FILTER_TYPES = DEFAULT_TYPES;
