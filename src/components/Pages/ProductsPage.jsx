@@ -15,7 +15,7 @@ import '../../styles/filters.css';
 export default function ProductsPage() {
     pageTitle('Produits');
     const [active, setActive] = useState('all');
-    const [itemShow, setItemShow] = useState(6);
+    const [itemShow, setItemShow] = useState(9);
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [filters, setFilters] = useState({
@@ -139,7 +139,10 @@ export default function ProductsPage() {
                         </ul>
                     </Div>
                 </Div>
-                <ProductFilters value={filters} onChange={setFilters} />
+                <ProductFilters value={filters} onChange={(newFilters) => {
+                  setFilters(newFilters);
+                  setItemShow(9); // Réinitialise la pagination après application des filtres
+                }} />
                 <Spacing lg="40" md="20" />
                 <Spacing lg="90" md="45" />
                 <Div className="row">
@@ -170,7 +173,7 @@ export default function ProductsPage() {
                         })}
                 </Div>
 
-                <Div className="text-center">
+                <Div className="text-center" style={{ display: "flex", justifyContent: "center" }}>
                     {filteredProducts.length <= itemShow ? (
                         ''
                     ) : (
@@ -178,7 +181,7 @@ export default function ProductsPage() {
                             <Spacing lg="65" md="40" />
                             <span
                                 className="cs-text_btn"
-                                onClick={() => setItemShow(itemShow + 6)}
+                                onClick={() => setItemShow(itemShow + 9)}
                             >
                                 <span>Voir plus</span>
                                 <Icon icon="bi:arrow-right" />
