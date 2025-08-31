@@ -30,11 +30,13 @@
 }
 
 .voir-plus-container {
-  text-align: center;
-  margin: 20px 0;
+  /* Place the container as a full-width row inside the grid */
+  grid-column: 1 / -1;
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 20px 0;
+  text-align: center;
 }
 .voir-plus-btn {
   background-color: #c0392b;
