@@ -130,10 +130,11 @@ export default function ProductFilters({
   };
 
   const applyFilters = () => {
-    // Normalize brand and type values before applying
+    // Keep brand as-is (raw casing) for the UI select to stay in sync.
+    // Normalize only the type values here; brand is normalized later during matching.
     const normalizedDraft = {
       ...draft,
-      brand: draft.brand.length ? [norm(draft.brand[0])] : [],
+      brand: draft.brand, // DO NOT normalize brand here to avoid breaking the <select> value
       type: draft.type.map(normalizeType).filter(Boolean),
     };
     onChange(normalizeValue(normalizedDraft));
