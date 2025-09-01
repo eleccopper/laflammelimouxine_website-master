@@ -1,4 +1,11 @@
 
+/* ==========================================================================
+   La Flamme Limouxine - Filters CSS
+   Purpose: Dedicated styles for product filters and related UI.
+   Note: All selectors use the `.lfl-` namespace to avoid conflicts with
+         global styles or external libraries.
+   ========================================================================== */
+
 
 /* Product Filters – dedicated styles
    Keep selectors namespaced with `.lfl-` to avoid collisions. */
@@ -42,3 +49,28 @@
 .lfl-skeleton { background:#f3f3f3; border-radius:8px; }
 .lfl-skeleton--title { height:28px; width:60%; margin:1rem 0; }
 .lfl-skeleton--block { height:180px; width:100%; }
+
+/* Button styles for "Voir plus" or other CTA buttons */
+.lfl-text_btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #d32f2f; /* rouge foncé, cohérent avec les autres boutons */
+  color: #fff !important;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+}
+
+.lfl-text_btn:hover {
+  background-color: #b71c1c; /* plus foncé au survol */
+  text-decoration: none;
+}
+
+.lfl-text_btn svg {
+  margin-left: 8px;
+  font-size: 1.2em;
+}

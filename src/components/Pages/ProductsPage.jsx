@@ -193,13 +193,13 @@ export default function ProductsPage() {
         </Div>
 
         {/* Filtres avancés */}
-        <ProductFilters
+        {/* <ProductFilters
           value={filters}
           onChange={(newFilters) => {
             setFilters(newFilters);
             setItemShow(9); // réinitialise la pagination après application des filtres
           }}
-        />
+        /> */}
 
         <Spacing lg="40" md="20" />
         <Spacing lg="90" md="45" />
