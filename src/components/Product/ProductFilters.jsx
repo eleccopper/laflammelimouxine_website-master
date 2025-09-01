@@ -82,10 +82,31 @@ export default function ProductFilters({
   // Update only the local draft
   const set = (patch) => setDraft((prev) => ({ ...prev, ...patch }));
 
+  // Normalize type string for consistent filtering & display
+  const normalizeType = (t) => {
+    if (typeof t !== "string") return "";
+    return t
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // strip accents
+      .replace(/\s+/g, ' ')             // collapse spaces
+      .trim()
+      .toLowerCase();
+  };
+
+  // Toggle item in array (for type filter multi-select)
   const toggleIn = (key, item) => {
     const arr = new Set((draft && draft[key]) || []);
-    if (arr.has(item)) arr.delete(item);
-    else arr.add(item);
+    const normalizedItem = normalizeType(item);
+    // We normalize existing array items too for comparison
+    let found = false;
+    for (let val of arr) {
+      if (normalizeType(val) === normalizedItem) {
+        arr.delete(val);
+        found = true;
+        break;
+      }
+    }
+    if (!found) arr.add(item);
     set({ [key]: Array.from(arr) });
   };
 
@@ -108,7 +129,15 @@ export default function ProductFilters({
     onChange(empty);
   };
 
-  const applyFilters = () => onChange(normalizeValue(draft));
+  const applyFilters = () => {
+    // Normalize brand and type values before applying
+    const normalizedDraft = {
+      ...draft,
+      brand: draft.brand.length ? [norm(draft.brand[0])] : [],
+      type: draft.type.map(normalizeType).filter(Boolean),
+    };
+    onChange(normalizeValue(normalizedDraft));
+  };
 
   return (
     <form className="lfl-filters" onSubmit={(e) => e.preventDefault()} aria-label="Filtres produits">
@@ -132,16 +161,20 @@ export default function ProductFilters({
         <fieldset className="lfl-filter lfl-filter--type">
           <legend className="lfl-filter__label">Type</legend>
           <div className="lfl-filter__group">
-            {types.map((t) => (
-              <label key={t} className="lfl-check">
-                <input
-                  type="checkbox"
-                  checked={draft.type.includes(t)}
-                  onChange={() => toggleIn("type", t)}
-                />
-                <span className="lfl-check__text">{labelizeType(t)}</span>
-              </label>
-            ))}
+            {types.map((t) => {
+              const normalizedDraftTypes = draft.type.map(normalizeType);
+              const normalizedT = normalizeType(t);
+              return (
+                <label key={t} className="lfl-check">
+                  <input
+                    type="checkbox"
+                    checked={normalizedDraftTypes.includes(normalizedT)}
+                    onChange={() => toggleIn("type", t)}
+                  />
+                  <span className="lfl-check__text">{labelizeType(t)}</span>
+                </label>
+              );
+            })}
           </div>
         </fieldset>
 
@@ -220,7 +253,7 @@ export default function ProductFilters({
         .lfl-filter--type { grid-column: span 3; }
         .lfl-filter--brand { grid-column: span 3; }
         .lfl-filter--power { grid-column: span 2; }
-        .lfl-filter--actions { grid-column: span 1; display: flex; align-items: end; }
+        .lfl-filter--actions { grid-column: span 1; display: flex; align-items: center; justify-content: center; }
         .lfl-filter--actions { gap:.5rem; flex-wrap:wrap; }
         @media (max-width: 980px) {
           .lfl-filter--category, .lfl-filter--type, .lfl-filter--brand, .lfl-filter--power, .lfl-filter--actions { grid-column: span 12; }
@@ -325,10 +358,11 @@ export function productMatchesFilters(product, filters) {
     return false;
   }
 
-  // Type (at least one selected must match). Filter values are lowercased.
+  // Type (at least one selected must match). Filter values are lowercased and normalized.
   if (f.type.length) {
-    const prodTypes = getTypeArray(product).map((x) => String(x).toLowerCase());
-    const ok = f.type.some((val) => prodTypes.includes(String(val).toLowerCase()));
+    const prodTypes = getTypeArray(product).map((x) => norm(String(x)));
+    const wantedTypes = f.type.map(norm);
+    const ok = wantedTypes.some((val) => prodTypes.includes(val));
     if (!ok) return false;
   }
 
