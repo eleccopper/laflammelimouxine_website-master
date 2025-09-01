@@ -243,7 +243,7 @@ export default function ProductsPage() {
             <>
               <Spacing lg="65" md="40" />
               <span
-                className="cs-text_btn"
+                className="cs-text_btn lfl-text_btn"
                 onClick={() => setItemShow((n) => n + 9)}
                 role="button"
                 tabIndex={0}
