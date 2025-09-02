@@ -17,8 +17,7 @@ export default function ContactInfoWidget({withIcon, title}) {
         </li>
         <li>
           <span className='cs-accent_color'><Icon icon="mdi:map-marker" /></span>
-          Route de Carcassonne OZE Charles Cros. RD118 Bureau C pôle d'Entreprises
-          11300 PIEUSSE
+          27 Chem. de la Plaine, 11250 Rouffiac-d'Aude
         </li>
       </ul>
     </>
