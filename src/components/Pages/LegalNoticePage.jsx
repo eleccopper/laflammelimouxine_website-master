@@ -30,10 +30,7 @@ export default function LegalNotice() {
             <p>Téléphone : 08 203 203 63</p>
 
             <p><strong>4. Conception et réalisation du site</strong></p>
-            <p>Développeur : Tristan Navez</p>
-            <p>SIREN : 954 036 513</p>
-            <p>Github : https://github.com/tristannavez</p>
-            <p>Website : https://tristannavez.fr</p>
+            <p>Ce site a été conçu et développé en interne par l’équipe de La Flamme Limouxine, mettant en avant son savoir-faire, son expertise technique et son engagement dans la transition énergétique.</p>
 
             <p><strong>5. Propriété intellectuelle</strong></p>
             <p>Le site ainsi que son contenu sont protégés par les dispositions du Code de la propriété intellectuelle.</p>
