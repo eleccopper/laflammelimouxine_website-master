@@ -30,7 +30,7 @@ export default function MarketingAgencyHome() {
       {/* Start Hero Section */}
       <Hero5
         title="La Flamme Limouxine"
-        subtitle="Vente, installation, entretien et dépannage de solutions énergétiques dans le secteur de l'Occitanie et de l'Arièges."
+        subtitle="Vente, installation, entretien et dépannage de solutions énergétiques dans le secteur de l'Occitanie."
         btnLink="contact"
         btnText="Nous contacter"
         socialLinksHeading="Suis nous"
