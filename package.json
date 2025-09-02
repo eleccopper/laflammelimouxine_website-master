@@ -32,7 +32,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "sitemap": "node scripts/generate-sitemap.mjs",
-    "heroku-postbuild": "npm run build",
+    "heroku-postbuild": "npm run build && npm run sitemap",
     "postbuild": "npm run sitemap"
   },
   "eslintConfig": {
