@@ -1,15 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Div from '../Div';
+import './index.css';
 
 export default function PageHeading({ title, bgSrc, pageLinkText }) {
   return (
     <Div
       className="cs-page_heading cs-style1 cs-center text-center cs-bg"
-      style={{ backgroundImage: `url(${bgSrc})`, position: 'relative' }}
+      style={{ backgroundImage: `url(${bgSrc})`, position: 'relative', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
     >
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)' }}></div>
-      <Div className="container">
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.35)', pointerEvents: 'none', zIndex: 0 }}></div>
+      <Div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <Div className="cs-page_heading_in">
           <Div className="cs-page_heading_logo">
             <img src="/images/logo_flamme.png" alt="Logo Flamme" />
