@@ -153,10 +153,24 @@ hr {
   width: 100%;
 }
 
+
 .cs-center {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Utility: text alignment + full centering column */
+.cs-text_center {
+  text-align: center;
+}
+
+.cs-center_col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .cs-white_color,

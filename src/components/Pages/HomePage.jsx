@@ -35,6 +35,7 @@ export default function MarketingAgencyHome() {
         btnText="Nous contacter"
         socialLinksHeading="Suis nous"
         heroSocialLinks={heroSocialLinks}
+        className="cs-center_col"
       />
       {/* End Hero Section */}
 
