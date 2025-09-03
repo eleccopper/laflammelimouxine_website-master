@@ -46,37 +46,56 @@ export default function ProductDetailsPage() {
 
     useEffect(() => {
         const fetchProductDetails = async () => {
-            try {
-                const API = strapiUrl;
-                const requestedPath = `/products/${slug}`;
+          try {
+            const API = (strapiUrl || '').replace(/\/$/, '');
+            const raw = decodeURIComponent(slug || '').trim();
+            const normalized = raw.toLowerCase();
 
-                // 1) Try by href
-                let res = await fetch(`${API}/products?filters[href][$eq]=${encodeURIComponent(requestedPath)}&populate=*`);
-                let json = await res.json();
+            // Helper: fetch with better error visibility
+            const fetchJson = async (url) => {
+              const res = await fetch(url);
+              let payload = null;
+              try { payload = await res.json(); } catch { /* ignore */ }
+              if (!res.ok) {
+                // console detailed error then continue to next candidate
+                console.warn('[product-details] fetch failed', res.status, url, payload?.error || payload);
+                return { ok: false, data: [] };
+              }
+              return { ok: true, ...(payload || {}) };
+            };
 
-                // 2) Fallback by slug
-                if (!json?.data?.length) {
-                    res = await fetch(`${API}/products?filters[slug][$eq]=${encodeURIComponent(slug)}&populate=*`);
-                    json = await res.json();
-                }
+            // Always request live content and populate relations/media
+            const baseParams = 'populate=*&publicationState=live';
 
-                // 3) Fallback by id/documentId (compatibility)
-                if (!json?.data?.length) {
-                    res = await fetch(`${API}/products/${encodeURIComponent(slug)}?populate=*`);
-                    json = await res.json();
-                    // Single entity style { data: {...} }
-                    if (json?.data) {
-                        setProductDetails(normalize(json.data));
-                        return;
-                    }
-                }
+            // Try by slug (case-insensitive), then by title (case-insensitive), then by href if present in your model
+            const candidates = [
+              `${API}/products?filters[slug][$eqi]=${encodeURIComponent(normalized)}&${baseParams}`,
+              `${API}/products?filters[title][$eqi]=${encodeURIComponent(raw)}&${baseParams}`,
+              `${API}/products?filters[href][$eq]=${encodeURIComponent(`/products/${raw}`)}&${baseParams}`,
+            ];
 
-                if (json?.data?.length) {
-                    setProductDetails(normalize(json.data[0]));
-                }
-            } catch (error) {
-                console.error('Error fetching product details:', error);
+            for (const url of candidates) {
+              const json = await fetchJson(url);
+              if (json.ok && Array.isArray(json.data) && json.data.length) {
+                setProductDetails(normalize(json.data[0]));
+                return;
+              }
             }
+
+            // Fallback: if the route param is a numeric id, query by id
+            if (/^\d+$/.test(raw)) {
+              const byId = await fetchJson(`${API}/products/${raw}?populate=*`);
+              if (byId.ok && byId.data) {
+                setProductDetails(normalize(byId.data));
+                return;
+              }
+            }
+
+            // Nothing found
+            console.error('[product-details] no product found for', raw);
+          } catch (error) {
+            console.error('Error fetching product details:', error);
+          }
         };
 
         fetchProductDetails();
