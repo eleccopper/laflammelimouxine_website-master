@@ -69,8 +69,12 @@ export default function ProductDetailsPage() {
 
             // Try by slug (case-insensitive), then by title (case-insensitive), then by href if present in your model
             const candidates = [
-              `${API}/products?filters[slug][$eqi]=${encodeURIComponent(normalized)}&${baseParams}`,
-              `${API}/products?filters[title][$eqi]=${encodeURIComponent(raw)}&${baseParams}`,
+              // Exact match on slug (use lower-case normalized value)
+              `${API}/products?filters[slug][$eq]=${encodeURIComponent(normalized)}&${baseParams}`,
+              // Fallbacks: case-insensitive contains on slug or title
+              `${API}/products?filters[slug][$containsi]=${encodeURIComponent(raw)}&${baseParams}`,
+              `${API}/products?filters[title][$containsi]=${encodeURIComponent(raw)}&${baseParams}`,
+              // Optional legacy href match if your model has this field
               `${API}/products?filters[href][$eq]=${encodeURIComponent(`/products/${raw}`)}&${baseParams}`,
             ];
 
