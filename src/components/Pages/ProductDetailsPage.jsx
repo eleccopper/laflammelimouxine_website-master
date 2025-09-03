@@ -69,13 +69,12 @@ export default function ProductDetailsPage() {
 
             // Try by slug (case-insensitive), then by title (case-insensitive), then by href if present in your model
             const candidates = [
-              // Exact match on slug (use lower-case normalized value)
-              `${API}/products?filters[slug][$eq]=${encodeURIComponent(normalized)}&${baseParams}`,
-              // Fallbacks: case-insensitive contains on slug or title
-              `${API}/products?filters[slug][$containsi]=${encodeURIComponent(raw)}&${baseParams}`,
+              // 1) Exact match on title (most reliable if you build links from Strapi data)
+              `${API}/products?filters[title][$eq]=${encodeURIComponent(raw)}&${baseParams}`,
+              // 2) Case-insensitive partial match on title
               `${API}/products?filters[title][$containsi]=${encodeURIComponent(raw)}&${baseParams}`,
-              // Optional legacy href match if your model has this field
-              `${API}/products?filters[href][$eq]=${encodeURIComponent(`/products/${raw}`)}&${baseParams}`,
+              // 3) OR search on common alternative field names if exist in your model (title/name)
+              `${API}/products?filters[$or][0][title][$containsi]=${encodeURIComponent(raw)}&filters[$or][1][name][$containsi]=${encodeURIComponent(raw)}&${baseParams}`,
             ];
 
             for (const url of candidates) {
