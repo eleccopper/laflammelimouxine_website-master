@@ -13,7 +13,7 @@ export default function ContactInfoWidget({withIcon, title}) {
         <li>
           <span className='cs-accent_color'><Icon icon="mdi:envelope" /></span>
           Lundi au samedi
-          8h - 12h / 14h - 18h
+          10h - 12h30 / 13h30 - 18h
         </li>
         <li>
           <span className='cs-accent_color'><Icon icon="mdi:map-marker" /></span>
