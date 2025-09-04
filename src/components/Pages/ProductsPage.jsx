@@ -60,24 +60,38 @@ export default function ProductsPage() {
   }, []);
 
   // Fetch produits + catégories
-  useEffect(() => {
-    fetch(`${strapiUrl}/products?populate=*`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data?.data)) setProducts(data.data);
-        else if (Array.isArray(data)) setProducts(data);
-        else console.error('Unexpected products shape:', data);
-      })
-      .catch((e) => console.error('Error fetching products:', e));
 
-    fetch(`${strapiUrl}/categories?populate=*`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data?.data)) setCategories(data.data);
-        else if (Array.isArray(data)) setCategories(data);
-        else console.error('Unexpected categories shape:', data);
-      })
-      .catch((e) => console.error('Error fetching categories:', e));
+  // Helper: récupère **toutes** les pages Strapi (évite la limite par défaut 25)
+  async function fetchAll(strapiBaseUrl, resource, populate = '*') {
+    const all = [];
+    let page = 1;
+    const pageSize = 100; // ajuste si besoin
+    while (true) {
+      const url = `${strapiBaseUrl}/${resource}?populate=${encodeURIComponent(populate)}&pagination[page]=${page}&pagination[pageSize]=${pageSize}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      const data = Array.isArray(json?.data) ? json.data : Array.isArray(json) ? json : [];
+      all.push(...data);
+      const pageCount = json?.meta?.pagination?.pageCount || 1;
+      if (page >= pageCount) break;
+      page += 1;
+    }
+    return all;
+  }
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [allProducts, allCategories] = await Promise.all([
+          fetchAll(strapiUrl, 'products', '*'),
+          fetchAll(strapiUrl, 'categories', '*'),
+        ]);
+        setProducts(allProducts);
+        setCategories(allCategories);
+      } catch (e) {
+        console.error('Error fetching products/categories:', e);
+      }
+    })();
   }, [strapiUrl]);
 
   // Normalisation/lecture tolérante des champs d'un produit (Strapi v4/v5, champs à plat ou sous attributes)
